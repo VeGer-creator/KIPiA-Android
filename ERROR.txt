@@ -1,0 +1,309 @@
+E:\AndroidStudioProjects\KIPiA\app\build\tmp\kapt3\stubs\debug\com\example\kipia\database\PKUDao.java:15: error: Not sure how to convert a Cursor to this method's return type (java.lang.Object).
+    public abstract java.lang.Object getAllPKUs(@org.jetbrains.annotations.NotNull()
+                                     ^
+Ask Gemini
+
+package com.example.kipia.database;
+
+@kotlin.Metadata(mv = {1, 9, 0}, k = 1, xi = 48, d1 = {"\u0000$\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0000\n\u0002\u0010\u0002\n\u0000\n\u0002\u0010\t\n\u0002\b\u0002\n\u0002\u0010 \n\u0002\u0018\u0002\n\u0002\b\u0005\bg\u0018\u00002\u00020\u0001J\u0016\u0010\u0002\u001a\u00020\u00032\u0006\u0010\u0004\u001a\u00020\u0005H\u00a7@\u00a2\u0006\u0002\u0010\u0006J\u0014\u0010\u0007\u001a\b\u0012\u0004\u0012\u00020\t0\bH\u00a7@\u00a2\u0006\u0002\u0010\nJ\u0016\u0010\u000b\u001a\u00020\u00032\u0006\u0010\f\u001a\u00020\tH\u00a7@\u00a2\u0006\u0002\u0010\r\u00a8\u0006\u000e"}, d2 = {"Lcom/example/kipia/database/PKUDao;", "", "deleteById", "", "id", "", "(JLkotlin/coroutines/Continuation;)Ljava/lang/Object;", "getAllPKUs", "", "Lcom/example/kipia/database/PKUEntity;", "(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;", "insert", "pku", "(Lcom/example/kipia/database/PKUEntity;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;", "app_debug"})
+@androidx.room.Dao()
+public abstract interface PKUDao {
+    
+    @androidx.room.Insert(onConflict = 1)
+    @org.jetbrains.annotations.Nullable()
+    public abstract java.lang.Object insert(@org.jetbrains.annotations.NotNull()
+    com.example.kipia.database.PKUEntity pku, @org.jetbrains.annotations.NotNull()
+    kotlin.coroutines.Continuation<? super kotlin.Unit> $completion);
+    
+    @androidx.room.Query(value = "SELECT * FROM pku_table ORDER BY name ASC")
+    @org.jetbrains.annotations.Nullable()
+    public abstract java.lang.Object getAllPKUs(@org.jetbrains.annotations.NotNull()
+    kotlin.coroutines.Continuation<? super java.util.List<com.example.kipia.database.PKUEntity>> $completion);
+    
+    @androidx.room.Query(value = "DELETE FROM pku_table WHERE id = :id")
+    @org.jetbrains.annotations.Nullable()
+    public abstract java.lang.Object deleteById(long id, @org.jetbrains.annotations.NotNull()
+    kotlin.coroutines.Continuation<? super kotlin.Unit> $completion);
+}
+
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose) // ← Подключаем Compose Compiler Plugin
+    id("kotlin-kapt")
+}
+
+android {
+    namespace = "com.example.kipia"
+    compileSdk = 34 // Убираем version = release(36), это ошибка
+
+    defaultConfig {
+        applicationId = "com.example.kipia"
+        minSdk = 21
+        targetSdk = 34 // Обнови до 34
+        versionCode = 1
+        versionName = "1.0"
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+    buildFeatures {
+        compose = true
+    }
+}
+
+// ❌ УДАЛИЛИ buildscript ОТСЮДА
+
+dependencies {
+    implementation("androidx.core:core-ktx:1.10.1")
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("com.google.android.material:material:1.9.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+
+    // Compose BOM
+    implementation(platform("androidx.compose:compose-bom:2023.10.01")) // Управляет версиями Compose
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.compose.material:material")
+    implementation("androidx.activity:activity-compose:1.8.0") // Для Compose Activity
+
+    // Room
+    implementation("androidx.room:room-runtime:2.5.0")
+    implementation("androidx.room:room-ktx:2.5.0")
+    kapt("androidx.room:room-compiler:2.5.0")
+
+    // Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4") // <-- если используешь
+
+    // ViewModel
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
+    implementation("androidx.activity:activity-ktx:1.7.2")
+
+    testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    androidTestImplementation(platform("androidx.compose:compose-bom:2023.10.01"))
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    debugImplementation("androidx.compose.ui:ui-tooling")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
+}
+
+plugins {
+    id("com.android.application") version "8.2.2" apply false
+    id("org.jetbrains.kotlin.android") version "2.0.21" apply false
+    // Если используешь Compose Compiler Plugin:
+    id("org.jetbrains.kotlin.plugin.compose") version "2.0.21" apply false
+}
+
+package com.example.kipia.database
+
+import android.content.Context
+import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
+
+@Database(
+    entities = [PKUEntity::class],
+    version = 1,
+    exportSchema = false
+)
+abstract class AppDatabase : RoomDatabase() {
+
+    abstract fun pkuDao(): PKUDao
+
+    companion object {
+        @Volatile
+        private var INSTANCE: AppDatabase? = null
+
+        fun getDatabase(context: Context): AppDatabase {
+            return INSTANCE ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    AppDatabase::class.java,
+                    "kipia_database"
+                ).build()
+                INSTANCE = instance
+                instance
+            }
+        }
+    }
+}
+
+package com.example.kipia.database
+
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+
+@Dao
+interface PKUDao {
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(pku: PKUEntity)
+
+    @Query("SELECT * FROM pku_table ORDER BY name ASC")
+    suspend fun getAllPKUs(): List<PKUEntity> // <-- Это ПРАВИЛЬНО
+
+    @Query("DELETE FROM pku_table WHERE id = :id")
+    suspend fun deleteById(id: Long)
+}
+
+package com.example.kipia.database
+
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "pku_table")
+data class PKUEntity(
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0L,
+
+    val name: String,
+    val description: String = "",
+    val isCompleted: Boolean = false
+)
+
+package com.example.kipia.ui
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.kipia.database.AppDatabase
+import com.example.kipia.database.PKUEntity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+class PKUViewModel(private val database: AppDatabase) : ViewModel() {
+
+    private val _pkus = MutableStateFlow<List<PKUEntity>>(emptyList())
+    val pkus: StateFlow<List<PKUEntity>> = _pkus
+
+    init {
+        loadPKUs()
+    }
+
+    private fun loadPKUs() {
+        viewModelScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                database.pkuDao().getAllPKUs()
+            }
+            _pkus.value = result
+        }
+    }
+
+    fun addPKU(name: String, description: String = "") {
+        viewModelScope.launch {
+            val pku = PKUEntity(name = name, description = description)
+            withContext(Dispatchers.IO) {
+                database.pkuDao().insert(pku)
+            }
+            loadPKUs() // обновляем список
+        }
+    }
+
+    fun deletePKU(id: Long) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                database.pkuDao().deleteById(id)
+            }
+            loadPKUs()
+        }
+    }
+}
+
+
+[versions]
+agp = "8.2.2" # Android Gradle Plugin
+kotlin = "2.0.21"
+composeBom = "2023.10.01"
+room = "2.5.0"
+lifecycle = "2.6.2"
+activity = "1.8.0"
+coreKtx = "1.10.1"
+appcompat = "1.6.1"
+material = "1.9.0"
+constraintlayout = "2.1.4"
+kotlinxCoroutines = "1.6.4"
+
+[libraries]
+# AndroidX
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+androidx-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+
+# Compose
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+androidx-compose-material = { group = "androidx.compose.material", name = "material" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity" }
+
+# Room
+androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+
+# Lifecycle & ViewModel
+androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
+androidx-activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref = "activity" }
+
+# Coroutines
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
+
+# Testing
+junit = { group = "junit", name = "junit", version = "4.13.2" }
+androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version = "1.1.5" }
+androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version = "3.5.1" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" } # ← Добавь эту строку
+
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+// ДОБАВЬ ЭТОТ БЛОК:
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+
+        // ДОБАВЬ ЗЕРКАЛО ЗДЕСЬ
+        maven { url = uri("https://maven.aliyun.com/repository/google") }
+        maven { url = uri("https://maven.aliyun.com/repository/public") }
+        maven { url = uri("https://repo1.maven.org/maven2/") }
+    }
+}
+
+rootProject.name = "KIPiA"
+include(":app")

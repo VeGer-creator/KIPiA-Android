@@ -1,0 +1,17 @@
+> Task :app:compileDebugKotlin FAILED
+e: file:///E:/AndroidStudioProjects/KIPiA/app/src/main/java/com/example/kipia/ui/theme/Theme.kt:10:15 Unresolved reference 'Purple200'.
+e: file:///E:/AndroidStudioProjects/KIPiA/app/src/main/java/com/example/kipia/ui/theme/Theme.kt:11:22 Unresolved reference 'Purple700'.
+e: file:///E:/AndroidStudioProjects/KIPiA/app/src/main/java/com/example/kipia/ui/theme/Theme.kt:12:17 Unresolved reference 'Teal200'.
+e: file:///E:/AndroidStudioProjects/KIPiA/app/src/main/java/com/example/kipia/ui/theme/Theme.kt:16:15 Unresolved reference 'Purple500'.
+e: file:///E:/AndroidStudioProjects/KIPiA/app/src/main/java/com/example/kipia/ui/theme/Theme.kt:17:22 Unresolved reference 'Purple700'.
+e: file:///E:/AndroidStudioProjects/KIPiA/app/src/main/java/com/example/kipia/ui/theme/Theme.kt:18:17 Unresolved reference 'Teal200'.
+e: file:///E:/AndroidStudioProjects/KIPiA/app/src/main/java/com/example/kipia/ui/theme/Theme.kt:31:22 Argument type mismatch: actual type is 'com.example.kipia.ui.theme.Typography', but 'androidx.compose.material.Typography' was expected.
+e: file:///E:/AndroidStudioProjects/KIPiA/app/src/main/java/com/example/kipia/ui/theme/Theme.kt:32:18 Argument type mismatch: actual type is 'kotlin.Unit', but 'androidx.compose.material.Shapes' was expected.
+e: file:///E:/AndroidStudioProjects/KIPiA/app/src/main/java/com/example/kipia/ui/theme/Theme.kt:32:18 Classifier 'class Shapes : Any' does not have a companion object, so it cannot be used as an expression.
+e: file:///E:/AndroidStudioProjects/KIPiA/app/src/main/java/com/example/kipia/ui/theme/Type.kt:3:25 Unresolved reference 'material3'.
+e: file:///E:/AndroidStudioProjects/KIPiA/app/src/main/java/com/example/kipia/ui/theme/Type.kt:10:5 Conflicting declarations:
+class Typography : Any
+e: file:///E:/AndroidStudioProjects/KIPiA/app/src/main/java/com/example/kipia/ui/theme/Type.kt:11:5 No parameter with name 'bodyLarge' found.
+e: file:///E:/AndroidStudioProjects/KIPiA/app/src/main/java/com/example/kipia/ui/theme/Typography.kt:3:7 Conflicting declarations:
+val Typography: Typography
+
