@@ -1,0 +1,38 @@
+Executing tasks: [clean] in project E:\AndroidStudioProjects\KIPiA_1.0
+
+
+> Configure project :
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/build.gradle.kts:8:1: Unresolved reference: dependencyResolutionManagement
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/build.gradle.kts:9:5: Unresolved reference: repositoriesMode
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/build.gradle.kts:21:1: Val cannot be reassigned
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/build.gradle.kts:22:1: Unresolved reference: include
+
+FAILURE: Build failed with an exception.
+
+* Where:
+Build file 'E:\AndroidStudioProjects\KIPiA_1.0\build.gradle.kts' line: 8
+
+* What went wrong:
+Script compilation errors:
+
+  Line 08: dependencyResolutionManagement {
+           ^ Unresolved reference: dependencyResolutionManagement
+
+  Line 09:     repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+               ^ Unresolved reference: repositoriesMode
+
+  Line 21: rootProject.name = "KIPiA"
+           ^ Val cannot be reassigned
+
+  Line 22: include(":app")
+           ^ Unresolved reference: include
+
+4 errors
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 12s

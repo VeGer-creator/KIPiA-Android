@@ -1,0 +1,78 @@
+// app/src/main/java/com/example/kipia/database/NodeDao.kt
+package com.example.kipia.database
+
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Delete
+
+@Dao
+interface NodeDao {
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(node: NodeEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(nodes: List<NodeEntity>)
+
+    @Query("SELECT * FROM node_table WHERE tubeId = :tubeId")
+    suspend fun getNodesByTubeId(tubeId: Long): List<NodeEntity>
+
+    @Query("SELECT * FROM node_table WHERE id = :id")
+    suspend fun getNodeById(id: Long): NodeEntity?
+
+    @Delete
+    suspend fun delete(node: NodeEntity)
+
+    @Query("DELETE FROM node_table WHERE id = :id")
+    suspend fun deleteById(id: Long)
+}
+
+
+// app/src/main/java/com/example/kipia/ui/NodeViewModel.kt
+package com.example.kipia.ui
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.kipia.database.AppDatabase
+import com.example.kipia.database.NodeEntity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+class NodeViewModel(private val database: AppDatabase) : ViewModel() {
+
+    private val _nodes: MutableStateFlow<List<NodeEntity>> = MutableStateFlow(emptyList())
+    val nodes: StateFlow<List<NodeEntity>> = _nodes
+
+    fun loadNodesByTubeId(tubeId: Long) {
+        viewModelScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                database.nodeDao().getNodesByTubeId(tubeId)
+            }
+            _nodes.value = result
+        }
+    }
+
+    fun addNode(name: String, tubeId: Long) {
+        viewModelScope.launch {
+            val node = NodeEntity(name = name, tubeId = tubeId)
+            withContext(Dispatchers.IO) {
+                database.nodeDao().insert(node)
+            }
+            loadNodesByTubeId(tubeId) // обновляем список
+        }
+    }
+
+    fun deleteNode(id: Long, tubeId: Long) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                database.nodeDao().deleteById(id)
+            }
+            loadNodesByTubeId(tubeId) // обновляем список
+        }
+    }
+}

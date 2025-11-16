@@ -1,0 +1,16 @@
+> Task :app:compileDebugKotlin FAILED
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/MainActivity.kt:63:45 Cannot infer type for this parameter. Please specify it explicitly.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/MainActivity.kt:63:54 Cannot infer type for this parameter. Please specify it explicitly.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/MainActivity.kt:63:56 Unresolved reference 'NodeViewModel'.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/MainActivity.kt:103:47 Unresolved reference 'addNode'.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/MainActivity.kt:107:47 Unresolved reference 'deleteNode'.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/MainActivity.kt:180:20 Unresolved reference 'NodeViewModel'.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/MainActivity.kt:286:38 Cannot infer type for this parameter. Please specify it explicitly.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/MainActivity.kt:286:38 Property delegate must have a 'getValue(Nothing?, KProperty0<ERROR CLASS: Cannot infer argument for type parameter T>)' method. None of the following functions is applicable:
+fun <T> State<T>.getValue(thisObj: Any?, property: KProperty<*>): T
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/MainActivity.kt:286:52 Unresolved reference 'nodes'.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/MainActivity.kt:286:58 Cannot infer type for this parameter. Please specify it explicitly.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/MainActivity.kt:288:43 Unresolved reference 'loadNodesByTubeId'.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/MainActivity.kt:303:62 Unresolved reference 'name'.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/MainActivity.kt:307:67 Unresolved reference 'id'.
+

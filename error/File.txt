@@ -1,0 +1,526 @@
+Файлы проекта:
+
+
+// build.gradle.kts (корневой файл)
+plugins {
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.kotlin.android) apply false
+    alias(libs.plugins.kotlin.compose) apply false // ✅ ПРАВИЛЬНО: через alias
+}
+
+//lib.version.toml
+
+                    [versions]
+                    agp = "8.2.2" # Android Gradle Plugin
+                    kotlin = "2.0.21"
+                    composeBom = "2023.10.01"
+                    kotlinxCoroutinesAndroid = "1.7.0"
+room = "2.5.0"
+                    lifecycle = "2.6.2"
+                    activity = "1.8.0"
+                    coreKtx = "1.10.1"
+                    appcompat = "1.6.1"
+                    material = "1.9.0"
+                    constraintlayout = "2.1.4"
+                    kotlinxCoroutines = "1.6.4"
+roomRuntime = "2.5.1"
+
+                    [libraries]
+                    # AndroidX
+                    androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+                    androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+                    androidx-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+                    androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+
+                    # Compose
+                    androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+                    androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
+                    androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+                    androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+                    androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+                    androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+                    androidx-compose-material = { group = "androidx.compose.material", name = "material" }
+                    androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity" }
+
+                    # Room
+                    androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+                    androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+                    androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+
+                    # Lifecycle & ViewModel
+                    androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
+                    androidx-activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref = "activity" }
+
+                    # Coroutines
+
+androidx-room-runtime-v251 = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
+
+                    kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
+
+                    # Testing
+                    junit = { group = "junit", name = "junit", version = "4.13.2" }
+                    androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version = "1.1.5" }
+                    androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version = "3.5.1" }
+kotlinx-coroutines-android-v170 = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
+
+                    [plugins]
+                    android-application = { id = "com.android.application", version.ref = "agp" }
+                    kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+                    kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" } # ← Добавь эту строку
+
+// settings.gradle.kts
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+
+        // Добавьте зеркала
+        maven { url = uri("https://maven.aliyun.com/repository/google") }
+        maven { url = uri("https://maven.aliyun.com/repository/public") }
+        maven { url = uri("https://maven.aliyun.com/repository/gradle-plugin") }
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+    repositories {
+        google()
+        mavenCentral()
+
+        // Зеркала для Китая и других регионов
+        maven { url = uri("https://maven.aliyun.com/repository/google") }
+        maven { url = uri("https://maven.aliyun.com/repository/public") }
+        maven { url = uri("https://jitpack.io") }
+
+        // Резервные репозитории
+        maven { url = uri("https://repo1.maven.org/maven2/") }
+        maven { url = uri("https://plugins.gradle.org/m2/") }
+    }
+}
+
+rootProject.name = "KIPiA"
+include(":app")
+
+Файлы модуля app:
+
+// app/build.gradle.kts
+
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
+    id("kotlin-kapt")
+}
+
+android {
+    namespace = "com.example.kipia"
+    compileSdk = 34
+
+    defaultConfig {
+        applicationId = "com.example.kipia"
+        minSdk = 23 // Измените на 23 для совместимости с Room
+        targetSdk = 34
+        versionCode = 1
+        versionName = "1.0"
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+
+    buildFeatures {
+        compose = true
+    }
+}
+
+dependencies {
+    implementation("androidx.core:core-ktx:1.12.0")
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("com.google.android.material:material:1.10.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+
+    // Compose BOM
+    implementation(platform("androidx.compose:compose-bom:2023.10.01"))
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.compose.material:material")
+    implementation("androidx.activity:activity-compose:1.8.0")
+
+    // Room
+    implementation("androidx.room:room-runtime:2.6.0")
+    implementation("androidx.room:room-ktx:2.6.0")
+    kapt("androidx.room:room-compiler:2.6.0")
+
+    // Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
+    // ViewModel
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+
+    testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    androidTestImplementation(platform("androidx.compose:compose-bom:2023.10.01"))
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    debugImplementation("androidx.compose.ui:ui-tooling")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
+}
+
+//  app/src/main/java/com/example/kipia/database/AppDatabase.kt
+package com.example.kipia.database
+
+import android.content.Context
+import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
+
+@Database(
+    entities = [PKUEntity::class],
+    version = 1,
+    exportSchema = false
+)
+abstract class AppDatabase : RoomDatabase() {
+
+    abstract fun pkuDao(): PKUDao
+
+    companion object {
+        @Volatile
+        private var INSTANCE: AppDatabase? = null
+
+        fun getDatabase(context: Context): AppDatabase {
+            return INSTANCE ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    AppDatabase::class.java,
+                    "kipia_database"
+                                )
+                    .fallbackToDestructiveMigration() // ← ДОБАВЬ ЭТУ СТРОКУ
+                    .build()
+                INSTANCE = instance
+                instance
+            }
+        }
+    }
+}
+
+// app/src/main/java/com/example/kipia/database/PKUDao.kt
+
+package com.example.kipia.database
+
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+
+@Dao
+interface PKUDao {
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(pku: PKUEntity)
+
+    @Query("SELECT * FROM pku_table ORDER BY name ASC")
+    suspend fun getAllPKUs(): List<PKUEntity> // <-- Это ПРАВИЛЬНО
+
+    @Query("DELETE FROM pku_table WHERE id = :id")
+    suspend fun deleteById(id: Long)
+}
+
+// app/src/main/java/com/example/kipia/database/PKUEntity.kt
+
+package com.example.kipia.database
+
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "pku_table")
+data class PKUEntity(
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0L,
+
+    val name: String,
+    val description: String = "",
+    val isCompleted: Boolean = false
+)
+
+// app/src/main/java/com/example/kipia/ui/PKUViewModel.kt 
+package com.example.kipia.ui
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.kipia.database.AppDatabase
+import com.example.kipia.database.PKUEntity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+class PKUViewModel(private val database: AppDatabase) : ViewModel() {
+
+    private val _pkus = MutableStateFlow<List<PKUEntity>>(emptyList())
+    val pkus: StateFlow<List<PKUEntity>> = _pkus
+
+    init {
+        loadPKUs()
+    }
+
+    private fun loadPKUs() {
+        viewModelScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                database.pkuDao().getAllPKUs()
+            }
+            _pkus.value = result
+        }
+    }
+
+    fun addPKU(name: String, description: String = "") {
+        viewModelScope.launch {
+            val pku = PKUEntity(name = name, description = description)
+            withContext(Dispatchers.IO) {
+                database.pkuDao().insert(pku)
+            }
+            loadPKUs() // обновляем список
+        }
+    }
+
+    fun deletePKU(id: Long) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                database.pkuDao().deleteById(id)
+            }
+            loadPKUs()
+        }
+    }
+}
+
+// app/src/main/java/com/example/kipia/ui/PKUViewModelFactory.kt
+
+package com.example.kipia.ui
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import com.example.kipia.database.AppDatabase
+
+class PKUViewModelFactory(private val database: AppDatabase) : ViewModelProvider.Factory {
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(PKUViewModel::class.java)) {
+            return PKUViewModel(database) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
+
+//app/src/main/java/com/example/kipia/ui/MainActivity.kt
+
+package com.example.kipia
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.example.kipia.database.AppDatabase
+import com.example.kipia.ui.PKUViewModel
+import com.example.kipia.ui.theme.KIPITheme
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        setContent {
+            KIPITheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colors.background
+                ) {
+                    PKUScreen()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun PKUScreen() {
+    val context = LocalContext.current
+    val viewModel = remember {
+        PKUViewModel(AppDatabase.getDatabase(context))
+    }
+
+    val pkus by viewModel.pkus.collectAsState()
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Text(text = "Список ПКУ", style = MaterialTheme.typography.h5)
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        LazyColumn {
+            items(pkus) { pku ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    elevation = 4.dp
+                ) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(text = pku.name, style = MaterialTheme.typography.body1)
+                            if (pku.description.isNotEmpty()) {
+                                Text(
+                                    text = pku.description,
+                                    style = MaterialTheme.typography.body2,
+                                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
+                                )
+                            }
+                        }
+                        IconButton(onClick = { viewModel.deletePKU(pku.id) }) {
+                            Icon(Icons.Default.Delete, contentDescription = "Удалить")
+                        }
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(onClick = { viewModel.addPKU("Новый ПКУ", "Описание") }) {
+            Text("Добавить ПКУ")
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DefaultPreview() {
+    KIPITheme {
+        PKUScreen()
+    }
+}
+
+//app/src/main/java/com/example/kipia/ui/theme/Theme.kt
+
+package com.example.kipia.ui.theme
+
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.lightColors
+import androidx.compose.runtime.Composable
+
+private val LightColorPalette = lightColors(
+    primary = Purple500,
+    primaryVariant = Purple700,
+    secondary = Teal200
+)
+
+@Composable
+fun KIPITheme(content: @Composable () -> Unit) {
+    MaterialTheme(
+        colors = LightColorPalette,
+        typography = Typography,
+        shapes = Shapes,
+        content = content
+    )
+}
+
+
+Файлы новых сущностей нет.
+
+Файлы новых экранов UI нет.
+
+Другие важные файлы:
+app/src/main/AndroidManifest.xml
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.KIPiA">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.KIPiA">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
+
+app/src/main/res/values/strings.xml
+
+<resources>
+    <string name="app_name">KIPiA</string>
+</resources>
+
+app/src/main/res/values/colors.xml
+
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>
+
+app/src/main/res/values/themes.xml
+
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.KIPiA" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>
