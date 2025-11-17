@@ -26,4 +26,7 @@ interface TubeDao {
 
     @Query("DELETE FROM tube_table WHERE id = :id")
     suspend fun deleteById(id: Long)
+
+    @Query("UPDATE tube_table SET name = :name WHERE id = :id")
+    suspend fun update(id: Long, name: String)
 }

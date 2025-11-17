@@ -46,4 +46,15 @@ class ControlPointViewModel(private val database: AppDatabase) : ViewModel() {
             loadControlPoints()
         }
     }
+
+    fun updateControlPoint(id: Long, newName: String, newDescription: String = "") {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                database.controlPointDao().update(id, newName, newDescription)
+            }
+            loadControlPoints()
+        }
+    }
+
+
 }

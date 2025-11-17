@@ -13,4 +13,6 @@ data class ControlPointEntity(
 
     // Описание КП
     val description: String = ""
+
 )
+

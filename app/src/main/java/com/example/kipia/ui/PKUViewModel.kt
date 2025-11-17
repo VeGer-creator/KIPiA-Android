@@ -56,4 +56,19 @@ class PKUViewModel(private val database: AppDatabase) : ViewModel() {
             loadPKUsByControlPointId(controlPointId) // обновляем список
         }
     }
+
+    fun updatePKU(id: Long, newName: String, newDescription: String = "") {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                database.pkuDao().update(id, newName, newDescription)
+            }
+            // Обновляем список ПКУ для текущего КП
+            val current = withContext(Dispatchers.IO) {
+                database.pkuDao().getPKUById(id)
+            }
+            current?.let { pku ->
+                loadPKUsByControlPointId(pku.controlPointId)
+            }
+        }
+    }
 }

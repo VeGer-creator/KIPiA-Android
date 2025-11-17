@@ -29,4 +29,7 @@ interface PKUDao {
 
     @Query("DELETE FROM pku_table WHERE id = :id")
     suspend fun deleteById(id: Long)
+
+    @Query("UPDATE pku_table SET name = :name, description = :description WHERE id = :id")
+    suspend fun update(id: Long, name: String, description: String)
 }

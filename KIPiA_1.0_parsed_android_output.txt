@@ -57,11 +57,16 @@ KIPiA_1.0/
                   TubeDao.kt
                   TubeEntity.kt
                 model/
+                  NodeType.kt
                   PKU.kt
                   Tube.kt
                 ui/
+                  AddNodeDialog.kt
                   ControlPointViewModel.kt
+                  ControlPointViewModelFactory.kt
+                  EditNameDialog.kt
                   NodeViewModel.kt
+                  NodeViewModelFactory.kt
                   PKUViewModel.kt
                   PKUViewModelFactory.kt
                   TubeViewModel.kt
@@ -112,6 +117,10 @@ KIPiA_1.0/
     err2.txt
     err3.txt
     err4.txt
+    err5.txt
+    err6.txt
+    err7.txt
+    err8.txt
     File.txt
     File1.txt
     Структура.txt
@@ -215,17 +224,18 @@ dependencies {
     implementation("androidx.compose.material:material")
     implementation("androidx.activity:activity-compose:1.8.0")
 
-    // Room
-    implementation("androidx.room:room-runtime:2.6.0")
-    implementation("androidx.room:room-ktx:2.6.0")
-    kapt("androidx.room:room-compiler:2.6.0")
+    // Room - обновляем версии
+    implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+    kapt("androidx.room:room-compiler:2.6.1")
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
     // ViewModel
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
@@ -235,7 +245,6 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
-
 ----------------------------------------
 ================================================================================
 --- ИСХОДНЫЙ КОД (.java, .kt) ---
@@ -283,18 +292,20 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
+
 @Database(
     entities = [
-        ControlPointEntity::class, // Добавляем КП
-        PKUEntity::class,         // Обновляем ПКУ
-        TubeEntity::class,        // Обновляем Трубу
-        NodeEntity::class,        // Добавляем Узел
-        SectionEntity::class,     // Добавляем Отсек
-        EquipmentEntity::class    // Обновляем Оборудование
+        ControlPointEntity::class,
+        PKUEntity::class,
+        TubeEntity::class,
+        NodeEntity::class,
+        SectionEntity::class,
+        EquipmentEntity::class
     ],
-    version = 4, // Увеличиваем версию базы данных
+    version = 5, // Увеличиваем версию базы данных
     exportSchema = false
 )
+
 abstract class AppDatabase : RoomDatabase() {
     abstract fun controlPointDao(): ControlPointDao // Добавляем DAO для КП
     abstract fun pkuDao(): PKUDao
@@ -356,7 +367,12 @@ interface ControlPointDao {
 
     @Query("DELETE FROM control_point_table WHERE id = :id")
     suspend fun deleteById(id: Long)
+
+    // Исправленный метод update
+    @Query("UPDATE control_point_table SET name = :name, description = :description WHERE id = :id")
+    suspend fun update(id: Long, name: String, description: String)
 }
+
 ----------------------------------------
 
 ------------------------------------------------------------
@@ -367,6 +383,7 @@ package com.example.kipia.database
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import androidx.room.util.copy
 
 @Entity(tableName = "control_point_table")
 data class ControlPointEntity(
@@ -378,7 +395,10 @@ data class ControlPointEntity(
 
     // Описание КП
     val description: String = ""
+
 )
+
+
 ----------------------------------------
 
 ------------------------------------------------------------
@@ -472,7 +492,6 @@ data class EquipmentEntity(
 --- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\NodeDao.kt ---
 ------------------------------------------------------------
 
-// app/src/main/java/com/example/kipia/database/NodeDao.kt
 package com.example.kipia.database
 
 import androidx.room.Dao
@@ -501,6 +520,9 @@ interface NodeDao {
 
     @Query("DELETE FROM node_table WHERE id = :id")
     suspend fun deleteById(id: Long)
+
+    @Query("UPDATE node_table SET name = :name WHERE id = :id")
+    suspend fun update(id: Long, name: String)
 }
 ----------------------------------------
 
@@ -508,7 +530,6 @@ interface NodeDao {
 --- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\NodeEntity.kt ---
 ------------------------------------------------------------
 
-// app/src/main/java/com/example/kipia/database/NodeEntity.kt
 package com.example.kipia.database
 
 import androidx.room.Entity
@@ -530,11 +551,14 @@ data class NodeEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0L,
 
-    // Название узла, например "ОД 937/1", "Задвижка", "В 937/2"
+    // Название узла, например "ОД 937/1", "В 937/1", "Задвижка"
     val name: String,
 
     // ID трубы, к которой принадлежит узел
-    val tubeId: Long
+    val tubeId: Long,
+
+    // Тип узла как строка
+    val nodeType: String
 )
 ----------------------------------------
 
@@ -573,6 +597,9 @@ interface PKUDao {
 
     @Query("DELETE FROM pku_table WHERE id = :id")
     suspend fun deleteById(id: Long)
+
+    @Query("UPDATE pku_table SET name = :name, description = :description WHERE id = :id")
+    suspend fun update(id: Long, name: String, description: String)
 }
 ----------------------------------------
 
@@ -608,6 +635,7 @@ data class PKUEntity(
     // ID связанного КП
     val controlPointId: Long
 )
+
 ----------------------------------------
 
 ------------------------------------------------------------
@@ -710,6 +738,9 @@ interface TubeDao {
 
     @Query("DELETE FROM tube_table WHERE id = :id")
     suspend fun deleteById(id: Long)
+
+    @Query("UPDATE tube_table SET name = :name WHERE id = :id")
+    suspend fun update(id: Long, name: String)
 }
 ----------------------------------------
 
@@ -743,7 +774,9 @@ data class TubeEntity(
 
     // ID КП, к которому принадлежит труба
     val controlPointId: Long
+
 )
+
 ----------------------------------------
 
 ------------------------------------------------------------
@@ -765,20 +798,20 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.*
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.kipia.database.AppDatabase
 import com.example.kipia.database.ControlPointEntity
-import com.example.kipia.ui.ControlPointViewModel
-import com.example.kipia.ui.PKUViewModel
-import com.example.kipia.ui.TubeViewModel
-import com.example.kipia.ui.NodeViewModel
+import com.example.kipia.database.NodeEntity
+import com.example.kipia.database.TubeEntity
+import com.example.kipia.model.NodeType
+import com.example.kipia.ui.*
 import com.example.kipia.ui.theme.KIPITheme
+import androidx.compose.material.icons.filled.Edit
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -790,9 +823,9 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ) {
                     val context = LocalContext.current
-                    val controlPointViewModel = remember {
-                        ControlPointViewModel(AppDatabase.getDatabase(context))
-                    }
+                    val controlPointViewModel: ControlPointViewModel = viewModel(
+                        factory = ControlPointViewModelFactory(AppDatabase.getDatabase(context))
+                    )
                     val controlPoints by controlPointViewModel.controlPoints.collectAsState()
 
                     // Поднимаем состояние выбора КП в MainActivity
@@ -804,31 +837,37 @@ class MainActivity : ComponentActivity() {
                             controlPoints = controlPoints,
                             onControlPointClick = { cp -> selectedControlPoint = cp },
                             onAddControlPoint = { name, desc -> controlPointViewModel.addControlPoint(name, desc) },
-                            onDeleteControlPoint = { id -> controlPointViewModel.deleteControlPoint(id) }
+                            onDeleteControlPoint = { id -> controlPointViewModel.deleteControlPoint(id) },
+                            onEditControlPoint = { id, newName, description ->
+                                controlPointViewModel.updateControlPoint(id, newName, description)
+                            }
                         )
                     } else {
                         // Показываем ПКУ и Трубы для выбранного КП
-                        // Создаём ViewModel для ПКУ и Труб, передаём текущее выбранное КП
-                        val pkuViewModel = remember { PKUViewModel(AppDatabase.getDatabase(context)) }
-                        val tubeViewModel = remember { TubeViewModel(AppDatabase.getDatabase(context)) }
-                        val nodeViewModel = remember { NodeViewModel(AppDatabase.getDatabase(context)) } // Добавляем NodeViewModel
+                        val pkuViewModel: PKUViewModel = viewModel(
+                            factory = PKUViewModelFactory(AppDatabase.getDatabase(context))
+                        )
+                        val tubeViewModel: TubeViewModel = viewModel(
+                            factory = TubeViewModelFactory(AppDatabase.getDatabase(context))
+                        )
+                        val nodeViewModel: NodeViewModel = viewModel(
+                            factory = NodeViewModelFactory(AppDatabase.getDatabase(context))
+                        )
 
                         // Загружаем данные при изменении selectedControlPoint
                         LaunchedEffect(selectedControlPoint) {
                             selectedControlPoint?.let { cp ->
                                 pkuViewModel.loadPKUsByControlPointId(cp.id)
-                                // Для труб и узлов будем загружать по мере необходимости
+                                tubeViewModel.loadTubesByControlPointId(cp.id)
                             }
                         }
 
-                        // Передаём selectedControlPoint.value (а не сам selectedControlPoint) в ControlPointDetailScreen
-                        // Это immutable значение на момент вызова
                         ControlPointDetailScreen(
                             controlPoint = selectedControlPoint!!,
                             pkuViewModel = pkuViewModel,
                             tubeViewModel = tubeViewModel,
-                            nodeViewModel = nodeViewModel, // Передаём NodeViewModel
-                            onBackClick = { selectedControlPoint = null }, // Сбрасываем выбор
+                            nodeViewModel = nodeViewModel,
+                            onBackClick = { selectedControlPoint = null },
                             onAddPKU = { name, desc ->
                                 selectedControlPoint?.let { cp ->
                                     pkuViewModel.addPKU(name, desc, cp.id)
@@ -849,12 +888,10 @@ class MainActivity : ComponentActivity() {
                                     tubeViewModel.deleteTube(id, cp.id)
                                 }
                             },
-                            onAddNode = { name, tubeId ->
-                                // Вызываем callback для добавления Node
-                                nodeViewModel.addNode(name, tubeId)
+                            onAddNode = { name, tubeId, type ->
+                                nodeViewModel.addNode(name, tubeId, type)
                             },
                             onDeleteNode = { nodeId, tubeId ->
-                                // Вызываем callback для удаления Node
                                 nodeViewModel.deleteNode(nodeId, tubeId)
                             },
                             onAddEquipment = { name, nodeId, sectionId ->
@@ -876,8 +913,12 @@ fun ControlPointListScreen(
     controlPoints: List<ControlPointEntity>,
     onControlPointClick: (ControlPointEntity) -> Unit,
     onAddControlPoint: (String, String) -> Unit,
-    onDeleteControlPoint: (Long) -> Unit
+    onDeleteControlPoint: (Long) -> Unit,
+    onEditControlPoint: (Long, String, String) -> Unit
 ) {
+    var showEditDialog by remember { mutableStateOf(false) }
+    var editingControlPoint by remember { mutableStateOf<ControlPointEntity?>(null) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -890,15 +931,19 @@ fun ControlPointListScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 4.dp)
-                        .clickable { onControlPointClick(cp) }, // Позволяет выбрать КП
+                        .padding(vertical = 4.dp),
                     elevation = 4.dp
                 ) {
                     Row(
                         modifier = Modifier.padding(12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column(modifier = Modifier.weight(1f)) {
+                        // Название КП - клик для перехода к деталям
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clickable { onControlPointClick(cp) }
+                        ) {
                             Text(text = cp.name, style = MaterialTheme.typography.body1)
                             if (cp.description.isNotEmpty()) {
                                 Text(
@@ -908,6 +953,18 @@ fun ControlPointListScreen(
                                 )
                             }
                         }
+
+                        // Кнопка редактирования
+                        IconButton(
+                            onClick = {
+                                editingControlPoint = cp
+                                showEditDialog = true
+                            }
+                        ) {
+                            Icon(Icons.Default.Add, contentDescription = "Редактировать КП")
+                        }
+
+                        // Кнопка удаления
                         IconButton(onClick = { onDeleteControlPoint(cp.id) }) {
                             Icon(Icons.Default.Delete, contentDescription = "Удалить КП")
                         }
@@ -920,201 +977,43 @@ fun ControlPointListScreen(
             Text("Добавить КП")
         }
     }
-}
 
-@Composable
-fun ControlPointDetailScreen(
-    controlPoint: ControlPointEntity,
-    pkuViewModel: PKUViewModel,
-    tubeViewModel: TubeViewModel,
-    nodeViewModel: NodeViewModel,
-    onBackClick: () -> Unit,
-    onAddPKU: (String, String) -> Unit,
-    onDeletePKU: (Long) -> Unit,
-    onAddTube: (String) -> Unit,
-    onDeleteTube: (Long) -> Unit,
-    onAddNode: (String, Long) -> Unit,
-    onDeleteNode: (Long, Long) -> Unit,
-    onAddEquipment: (String, Long?, Long?) -> Unit,
-    onDeleteEquipment: (Long) -> Unit
-) {
-    // Получаем состояния из ViewModel
-    val pkus by pkuViewModel.pkus.collectAsState()
-    val tubes by tubeViewModel.tubes.collectAsState()
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        // Кнопка "Назад"
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Start
-        ) {
-            Button(onClick = onBackClick) {
-                Text("Назад к КП")
-            }
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "КП: ${controlPoint.name}", style = MaterialTheme.typography.h5)
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // --- Секция ПКУ ---
-        Text(text = "ПКУ", style = MaterialTheme.typography.h6)
-        LazyColumn(
-            modifier = Modifier.weight(1f)
-        ) {
-            items(pkus) { pku ->
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 2.dp),
-                    elevation = 2.dp
-                ) {
-                    Row(
-                        modifier = Modifier.padding(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(text = pku.name, style = MaterialTheme.typography.body2)
-                            if (pku.description.isNotEmpty()) {
-                                Text(
-                                    text = pku.description,
-                                    style = MaterialTheme.typography.caption,
-                                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
-                                )
-                            }
-                        }
-                        IconButton(
-                            onClick = {
-                                onDeletePKU(pku.id)
-                            }
-                        ) {
-                            Icon(Icons.Default.Delete, contentDescription = "Удалить ПКУ")
-                        }
-                    }
+    // Диалог редактирования КП
+    if (showEditDialog && editingControlPoint != null) {
+        EditNameDialog(
+            currentName = editingControlPoint!!.name,
+            title = "Редактировать КП",
+            hint = "Название КП",
+            onDismiss = {
+                showEditDialog = false
+                editingControlPoint = null
+            },
+            onConfirm = { newName ->
+                editingControlPoint?.let { cp ->
+                    onEditControlPoint(cp.id, newName, cp.description)
                 }
             }
-        }
-        Button(
-            onClick = {
-                onAddPKU("Новая ПКУ", "Описание")
-            }
-        ) {
-            Text("Добавить ПКУ")
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // --- Секция Трубы ---
-        Text(text = "Трубы", style = MaterialTheme.typography.h6)
-        LazyColumn(
-            modifier = Modifier.weight(1f)
-        ) {
-            items(tubes) { tube ->
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 2.dp),
-                    elevation = 2.dp
-                ) {
-                    Column {
-                        Row(
-                            modifier = Modifier.padding(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(text = tube.name, style = MaterialTheme.typography.body2)
-                            }
-                            IconButton(
-                                onClick = {
-                                    onDeleteTube(tube.id)
-                                }
-                            ) {
-                                Icon(Icons.Default.Delete, contentDescription = "Удалить Трубу")
-                            }
-                        }
-
-                        // --- Секция Колодцев ---
-                        Text(text = "Колодцы", style = MaterialTheme.typography.h6)
-
-                        // Загружаем узлы при изменении tube.id
-                        LaunchedEffect(tube.id) {
-                            nodeViewModel.loadNodesByTubeId(tube.id)
-                        }
-
-                        // Получаем все узлы из ViewModel
-                        val nodesForThisTube by nodeViewModel.nodes.collectAsState()
-
-                        // Отображаем список узлов для этой трубы
-                        LazyColumn(
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxHeight() // Убедимся, что LazyColumn имеет ограниченную высоту
-                        ) {
-                            // Фильтруем узлы по текущему tube.id
-                            items(nodesForThisTube.filter { it.tubeId == tube.id }, key = { it.id }) { node ->
-                                Card(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 2.dp),
-                                    elevation = 1.dp
-                                ) {
-                                    Row(
-                                        modifier = Modifier.padding(8.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Column(modifier = Modifier.weight(1f)) {
-                                            Text(text = node.name, style = MaterialTheme.typography.body2)
-                                        }
-                                        IconButton(
-                                            onClick = {
-                                                onDeleteNode(node.id, tube.id)
-                                            }
-                                        ) {
-                                            Icon(Icons.Default.Delete, contentDescription = "Удалить Колодец")
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        Button(
-                            onClick = {
-                                onAddNode("Новый Колодец", tube.id)
-                            }
-                        ) {
-                            Text("Добавить Колодец")
-                        }
-                    }
-                }
-            }
-        }
-        Button(
-            onClick = {
-                onAddTube("Новая Труба")
-            }
-        ) {
-            Text("Добавить Трубу")
-        }
+        )
     }
 }
+----------------------------------------
 
+------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\model\NodeType.kt ---
+------------------------------------------------------------
 
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    KIPITheme {
-        val controlPoints = listOf(
-            ControlPointEntity(id = 1, name = "КП 937 км", description = "Описание КП"),
-            ControlPointEntity(id = 2, name = "КП 867 км", description = "Описание КП 2")
-        )
-        ControlPointListScreen(
-            controlPoints = controlPoints,
-            onControlPointClick = {},
-            onAddControlPoint = { _, _ -> },
-            onDeleteControlPoint = {}
-        )
+package com.example.kipia.model
+
+enum class NodeType(val displayName: String, val prefix: String) {
+    PRESSURE_WELL("Колодец отбора давления", "ОД"),
+    VENT_WELL("Вантузный колодец", "В"),
+    VALVE("Задвижка", "Задвижка"),
+    CUSTOM("Другой", "");
+
+    companion object {
+        fun fromString(value: String): NodeType {
+            return values().find { it.name == value } ?: CUSTOM
+        }
     }
 }
 ----------------------------------------
@@ -1145,6 +1044,153 @@ data class Tube(
     val name: String, // Например, "Сургут-Полоцк" или "Холмогоры-Клин"
     val pkuId: Long // Связь с PKU
 )
+----------------------------------------
+
+------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\AddNodeDialog.kt ---
+------------------------------------------------------------
+
+package com.example.kipia.ui
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import com.example.kipia.model.NodeType
+
+@Composable
+fun AddNodeDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (String, NodeType) -> Unit
+) {
+    var nodeName by remember { mutableStateOf("") }
+    var selectedType by remember { mutableStateOf(NodeType.PRESSURE_WELL) }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            elevation = 8.dp
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(
+                    text = "Добавить объект", // Изменили название
+                    style = MaterialTheme.typography.h6
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Выбор типа узла
+                Text("Тип объекта:")
+                LazyColumn(
+                    modifier = Modifier.height(160.dp) // Увеличили высоту для задвижки
+                ) {
+                    items(NodeType.values()) { type ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .   clickable { selectedType = type }
+                                .padding(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = selectedType == type,
+                                onClick = { selectedType = type }
+                            )
+                            Text(
+                                text = type.displayName,
+                                modifier = Modifier.padding(start = 8.dp)
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Поле для ввода названия
+                OutlinedTextField(
+                    value = nodeName,
+                    onValueChange = { nodeName = it },
+                    label = {
+                        Text(
+                            when (selectedType) {
+                                NodeType.PRESSURE_WELL -> "Номер ОД (например: 937/1)"
+                                NodeType.VENT_WELL -> "Номер В (например: 937/1)"
+                                NodeType.VALVE -> "Номер задвижки (например: 937)"
+                                NodeType.CUSTOM -> "Название объекта"
+                            }
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = {
+                        Text(
+                            when (selectedType) {
+                                NodeType.PRESSURE_WELL -> "Введите номер ОД"
+                                NodeType.VENT_WELL -> "Введите номер В"
+                                NodeType.VALVE -> "Введите номер задвижки"
+                                NodeType.CUSTOM -> "Введите название"
+                            }
+                        )
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Предпросмотр полного имени
+                if (nodeName.isNotBlank()) {
+                    val fullName = when (selectedType) {
+                        NodeType.CUSTOM -> nodeName
+                        NodeType.VALVE -> "${selectedType.prefix} $nodeName"
+                        else -> "${selectedType.prefix} $nodeName"
+                    }
+                    Text(
+                        text = "Полное имя: $fullName",
+                        style = MaterialTheme.typography.caption,
+                        color = MaterialTheme.colors.primary
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Кнопки
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Button(
+                        onClick = onDismiss,
+                        colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.error)
+                    ) {
+                        Text("Отмена")
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Button(
+                        onClick = {
+                            if (nodeName.isNotBlank()) {
+                                onConfirm(nodeName, selectedType)
+                                onDismiss()
+                            }
+                        },
+                        enabled = nodeName.isNotBlank()
+                    ) {
+                        Text("Добавить")
+                    }
+                }
+            }
+        }
+    }
+}
 ----------------------------------------
 
 ------------------------------------------------------------
@@ -1199,6 +1245,120 @@ class ControlPointViewModel(private val database: AppDatabase) : ViewModel() {
             loadControlPoints()
         }
     }
+
+    fun updateControlPoint(id: Long, newName: String, newDescription: String = "") {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                database.controlPointDao().update(id, newName, newDescription)
+            }
+            loadControlPoints()
+        }
+    }
+}
+----------------------------------------
+
+------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\ControlPointViewModelFactory.kt ---
+------------------------------------------------------------
+
+package com.example.kipia.ui
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import com.example.kipia.database.AppDatabase
+
+class ControlPointViewModelFactory(private val database: AppDatabase) : ViewModelProvider.Factory {
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(ControlPointViewModel::class.java)) {
+            return ControlPointViewModel(database) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
+----------------------------------------
+
+------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\EditNameDialog.kt ---
+------------------------------------------------------------
+
+package com.example.kipia.ui
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+
+@Composable
+fun EditNameDialog(
+    currentName: String,
+    title: String,
+    hint: String = "Введите название",
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    var newName by remember { mutableStateOf(currentName) }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            elevation = 8.dp
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.h6
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Поле для редактирования названия
+                OutlinedTextField(
+                    value = newName,
+                    onValueChange = { newName = it },
+                    label = { Text(hint) },
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text(hint) }
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Кнопки
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Button(
+                        onClick = onDismiss,
+                        colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.error)
+                    ) {
+                        Text("Отмена")
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Button(
+                        onClick = {
+                            if (newName.isNotBlank()) {
+                                onConfirm(newName)
+                                onDismiss()
+                            }
+                        },
+                        enabled = newName.isNotBlank()
+                    ) {
+                        Text("Сохранить")
+                    }
+                }
+            }
+        }
+    }
 }
 ----------------------------------------
 
@@ -1206,13 +1366,13 @@ class ControlPointViewModel(private val database: AppDatabase) : ViewModel() {
 --- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\NodeViewModel.kt ---
 ------------------------------------------------------------
 
-// app/src/main/java/com/example/kipia/ui/NodeViewModel.kt
 package com.example.kipia.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.kipia.database.AppDatabase
 import com.example.kipia.database.NodeEntity
+import com.example.kipia.model.NodeType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -1229,35 +1389,79 @@ class NodeViewModel(private val database: AppDatabase) : ViewModel() {
             val result = withContext(Dispatchers.IO) {
                 database.nodeDao().getNodesByTubeId(tubeId)
             }
-            println("DEBUG: Loaded nodes for tube $tubeId: $result") // <-- Добавьте это
+            println("DEBUG: Loaded nodes for tube $tubeId: $result")
             _nodes.value = result
         }
     }
 
-    fun addNode(name: String, tubeId: Long) {
-        println("DEBUG: addNode called with name=$name, tubeId=$tubeId") // <-- Добавь это
+    fun addNode(name: String, tubeId: Long, nodeType: NodeType) {
+        println("DEBUG: addNode called with name=$name, tubeId=$tubeId, type=$nodeType")
         viewModelScope.launch {
-            val node = NodeEntity(name = name, tubeId = tubeId)
-            println("DEBUG: About to insert node=$node") // <-- Добавь это
+            // Формируем полное имя в зависимости от типа
+            val fullName = when (nodeType) {
+                NodeType.CUSTOM -> name
+                else -> "${nodeType.prefix} $name"
+            }
+
+            val node = NodeEntity(
+                name = fullName,
+                tubeId = tubeId,
+                nodeType = nodeType.name // Сохраняем как строку
+            )
+            println("DEBUG: About to insert node=$node")
             withContext(Dispatchers.IO) {
                 database.nodeDao().insert(node)
             }
-            println("DEBUG: Node inserted, now loading nodes") // <-- Добавь это
+            println("DEBUG: Node inserted, now loading nodes")
             loadNodesByTubeId(tubeId)
-            println("DEBUG: Nodes loaded") // <-- Добавь это
+            println("DEBUG: Nodes loaded")
         }
     }
-
 
     fun deleteNode(id: Long, tubeId: Long) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 database.nodeDao().deleteById(id)
             }
-            println("DEBUG: Node deleted, now loading nodes") // <-- Добавь это
+            println("DEBUG: Node deleted, now loading nodes")
             loadNodesByTubeId(tubeId)
-            println("DEBUG: Nodes loaded") // <-- Добавь это
+            println("DEBUG: Nodes loaded")
         }
+    }
+
+    fun updateNode(id: Long, newName: String) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                database.nodeDao().update(id, newName)
+            }
+            // Обновляем список узлов для текущей трубы
+            val current = withContext(Dispatchers.IO) {
+                database.nodeDao().getNodeById(id)
+            }
+            current?.let { node ->
+                loadNodesByTubeId(node.tubeId)
+            }
+        }
+    }}
+----------------------------------------
+
+------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\NodeViewModelFactory.kt ---
+------------------------------------------------------------
+
+package com.example.kipia.ui
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import com.example.kipia.database.AppDatabase
+
+class NodeViewModelFactory(private val database: AppDatabase) : ViewModelProvider.Factory {
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(NodeViewModel::class.java)) {
+            return NodeViewModel(database) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
 ----------------------------------------
@@ -1324,6 +1528,22 @@ class PKUViewModel(private val database: AppDatabase) : ViewModel() {
             loadPKUsByControlPointId(controlPointId) // обновляем список
         }
     }
+
+    fun updatePKU(id: Long, newName: String, newDescription: String = "") {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                database.pkuDao().update(id, newName, newDescription)
+            }
+            // Обновляем список ПКУ для текущего КП
+            val current = withContext(Dispatchers.IO) {
+                database.pkuDao().getPKUById(id)
+            }
+            current?.let { pku ->
+                loadPKUsByControlPointId(pku.controlPointId)
+            }
+        }
+    }
+
 }
 ----------------------------------------
 
@@ -1474,12 +1694,10 @@ import kotlinx.coroutines.withContext
 
 class TubeViewModel(private val database: AppDatabase) : ViewModel() {
 
-    // Указываем тип явно: MutableStateFlow<List<TubeEntity>>
     private val _tubes: MutableStateFlow<List<TubeEntity>> = MutableStateFlow(emptyList())
-    // Указываем тип явно: StateFlow<List<TubeEntity>>
     val tubes: StateFlow<List<TubeEntity>> = _tubes
 
-    // Метод loadTubesByControlPointId - загрузка Труб по ID КП (вместо getTubesByPKUId)
+    // Метод loadTubesByControlPointId - загрузка Труб по ID КП
     fun loadTubesByControlPointId(controlPointId: Long) {
         viewModelScope.launch {
             val result = withContext(Dispatchers.IO) {
@@ -1508,6 +1726,22 @@ class TubeViewModel(private val database: AppDatabase) : ViewModel() {
             loadTubesByControlPointId(controlPointId) // обновляем список
         }
     }
+
+    fun updateTube(id: Long, newName: String) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                database.tubeDao().update(id, newName)
+            }
+            // Обновляем список труб для текущего КП
+            val current = withContext(Dispatchers.IO) {
+                database.tubeDao().getTubeById(id)
+            }
+            current?.let { tube ->
+                loadTubesByControlPointId(tube.controlPointId)
+            }
+        }
+    }
+
 }
 ----------------------------------------
 

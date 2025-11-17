@@ -1,4 +1,3 @@
-// app/src/main/java/com/example/kipia/database/NodeEntity.kt
 package com.example.kipia.database
 
 import androidx.room.Entity
@@ -20,9 +19,12 @@ data class NodeEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0L,
 
-    // Название узла, например "ОД 937/1", "Задвижка", "В 937/2"
+    // Название узла, например "ОД 937/1", "В 937/1", "Задвижка"
     val name: String,
 
     // ID трубы, к которой принадлежит узел
-    val tubeId: Long
+    val tubeId: Long,
+
+    // Тип узла как строка
+    val nodeType: String
 )

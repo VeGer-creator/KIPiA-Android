@@ -12,12 +12,10 @@ import kotlinx.coroutines.withContext
 
 class TubeViewModel(private val database: AppDatabase) : ViewModel() {
 
-    // Указываем тип явно: MutableStateFlow<List<TubeEntity>>
     private val _tubes: MutableStateFlow<List<TubeEntity>> = MutableStateFlow(emptyList())
-    // Указываем тип явно: StateFlow<List<TubeEntity>>
     val tubes: StateFlow<List<TubeEntity>> = _tubes
 
-    // Метод loadTubesByControlPointId - загрузка Труб по ID КП (вместо getTubesByPKUId)
+    // Метод loadTubesByControlPointId - загрузка Труб по ID КП
     fun loadTubesByControlPointId(controlPointId: Long) {
         viewModelScope.launch {
             val result = withContext(Dispatchers.IO) {
@@ -44,6 +42,21 @@ class TubeViewModel(private val database: AppDatabase) : ViewModel() {
                 database.tubeDao().deleteById(id)
             }
             loadTubesByControlPointId(controlPointId) // обновляем список
+        }
+    }
+
+    fun updateTube(id: Long, newName: String) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                database.tubeDao().update(id, newName)
+            }
+            // Обновляем список труб для текущего КП
+            val current = withContext(Dispatchers.IO) {
+                database.tubeDao().getTubeById(id)
+            }
+            current?.let { tube ->
+                loadTubesByControlPointId(tube.controlPointId)
+            }
         }
     }
 }

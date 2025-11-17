@@ -24,4 +24,5 @@ data class TubeEntity(
 
     // ID КП, к которому принадлежит труба
     val controlPointId: Long
+
 )

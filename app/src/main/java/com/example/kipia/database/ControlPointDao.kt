@@ -26,4 +26,8 @@ interface ControlPointDao {
 
     @Query("DELETE FROM control_point_table WHERE id = :id")
     suspend fun deleteById(id: Long)
+
+    // Исправленный метод update
+    @Query("UPDATE control_point_table SET name = :name, description = :description WHERE id = :id")
+    suspend fun update(id: Long, name: String, description: String)
 }

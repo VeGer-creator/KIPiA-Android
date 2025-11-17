@@ -1,4 +1,3 @@
-// app/src/main/java/com/example/kipia/database/NodeDao.kt
 package com.example.kipia.database
 
 import androidx.room.Dao
@@ -27,4 +26,9 @@ interface NodeDao {
 
     @Query("DELETE FROM node_table WHERE id = :id")
     suspend fun deleteById(id: Long)
+
+    @Query("UPDATE node_table SET name = :name WHERE id = :id")
+    suspend fun update(id: Long, name: String)
+
+
 }
