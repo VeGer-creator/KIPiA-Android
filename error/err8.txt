@@ -1,0 +1,57 @@
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/MainActivity.kt:80:25 Unresolved reference 'ControlPointDetailScreen'.
+Ask Gemini
+
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/MainActivity.kt:86:42 Cannot infer type for this parameter. Please specify it explicitly.
+Ask Gemini
+
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/MainActivity.kt:86:48 Cannot infer type for this parameter. Please specify it explicitly.
+Ask Gemini
+
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/MainActivity.kt:87:55 Cannot infer type for this parameter. Please specify it explicitly.
+Ask Gemini
+
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/MainActivity.kt:91:45 Cannot infer type for this parameter. Please specify it explicitly.
+Ask Gemini
+
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/MainActivity.kt:92:55 Cannot infer type for this parameter. Please specify it explicitly.
+Ask Gemini
+
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/MainActivity.kt:96:43 Cannot infer type for this parameter. Please specify it explicitly.
+Ask Gemini
+
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/MainActivity.kt:97:55 Cannot infer type for this parameter. Please specify it explicitly.
+Ask Gemini
+
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/MainActivity.kt:101:46 Cannot infer type for this parameter. Please specify it explicitly.
+Ask Gemini
+
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/MainActivity.kt:102:55 Cannot infer type for this parameter. Please specify it explicitly.
+Ask Gemini
+
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/MainActivity.kt:106:43 Cannot infer type for this parameter. Please specify it explicitly.
+Ask Gemini
+
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/MainActivity.kt:106:49 Cannot infer type for this parameter. Please specify it explicitly.
+Ask Gemini
+
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/MainActivity.kt:106:57 Cannot infer type for this parameter. Please specify it explicitly.
+Ask Gemini
+
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/MainActivity.kt:109:46 Cannot infer type for this parameter. Please specify it explicitly.
+Ask Gemini
+
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/MainActivity.kt:109:54 Cannot infer type for this parameter. Please specify it explicitly.
+Ask Gemini
+
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/MainActivity.kt:112:48 Cannot infer type for this parameter. Please specify it explicitly.
+Ask Gemini
+
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/MainActivity.kt:112:54 Cannot infer type for this parameter. Please specify it explicitly.
+Ask Gemini
+
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/MainActivity.kt:112:62 Cannot infer type for this parameter. Please specify it explicitly.
+Ask Gemini
+
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/MainActivity.kt:115:51 Cannot infer type for this parameter. Please specify it explicitly.
+Ask Gemini
+

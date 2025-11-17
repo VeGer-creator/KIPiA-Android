@@ -1,0 +1,524 @@
+package com.example.kipia
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.kipia.database.AppDatabase
+import com.example.kipia.database.ControlPointEntity
+import com.example.kipia.database.NodeEntity
+import com.example.kipia.database.TubeEntity
+import com.example.kipia.model.NodeType
+import com.example.kipia.ui.*
+import com.example.kipia.ui.theme.KIPITheme
+import androidx.compose.material.icons.filled.Edit
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            KIPITheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colors.background
+                ) {
+                    val context = LocalContext.current
+                    val controlPointViewModel: ControlPointViewModel = viewModel(
+                        factory = ControlPointViewModelFactory(AppDatabase.getDatabase(context))
+                    )
+                    val controlPoints by controlPointViewModel.controlPoints.collectAsState()
+
+                    // Поднимаем состояние выбора КП в MainActivity
+                    var selectedControlPoint by remember { mutableStateOf<ControlPointEntity?>(null) }
+
+                    if (selectedControlPoint == null) {
+                        // Показываем список КП
+                        ControlPointListScreen(
+                            controlPoints = controlPoints,
+                            onControlPointClick = { cp -> selectedControlPoint = cp },
+                            onAddControlPoint = { name, desc -> controlPointViewModel.addControlPoint(name, desc) },
+                            onDeleteControlPoint = { id -> controlPointViewModel.deleteControlPoint(id) },
+                            onEditControlPoint = { id, newName, description ->
+                                controlPointViewModel.updateControlPoint(id, newName, description)
+                            }
+                        )
+                    } else {
+                        // Показываем ПКУ и Трубы для выбранного КП
+                        val pkuViewModel: PKUViewModel = viewModel(
+                            factory = PKUViewModelFactory(AppDatabase.getDatabase(context))
+                        )
+                        val tubeViewModel: TubeViewModel = viewModel(
+                            factory = TubeViewModelFactory(AppDatabase.getDatabase(context))
+                        )
+                        val nodeViewModel: NodeViewModel = viewModel(
+                            factory = NodeViewModelFactory(AppDatabase.getDatabase(context))
+                        )
+
+                        // Загружаем данные при изменении selectedControlPoint
+                        LaunchedEffect(selectedControlPoint) {
+                            selectedControlPoint?.let { cp ->
+                                pkuViewModel.loadPKUsByControlPointId(cp.id)
+                                tubeViewModel.loadTubesByControlPointId(cp.id)
+                            }
+                        }
+
+                        ControlPointDetailScreen(
+                            controlPoint = selectedControlPoint!!,
+                            pkuViewModel = pkuViewModel,
+                            tubeViewModel = tubeViewModel,
+                            nodeViewModel = nodeViewModel,
+                            onBackClick = { selectedControlPoint = null },
+                            onAddPKU = { name, desc ->
+                                selectedControlPoint?.let { cp ->
+                                    pkuViewModel.addPKU(name, desc, cp.id)
+                                }
+                            },
+                            onDeletePKU = { id ->
+                                selectedControlPoint?.let { cp ->
+                                    pkuViewModel.deletePKU(id, cp.id)
+                                }
+                            },
+                            onAddTube = { name ->
+                                selectedControlPoint?.let { cp ->
+                                    tubeViewModel.addTube(name, cp.id)
+                                }
+                            },
+                            onDeleteTube = { id ->
+                                selectedControlPoint?.let { cp ->
+                                    tubeViewModel.deleteTube(id, cp.id)
+                                }
+                            },
+                            onAddNode = { name, tubeId, type ->
+                                nodeViewModel.addNode(name, tubeId, type)
+                            },
+                            onDeleteNode = { nodeId, tubeId ->
+                                nodeViewModel.deleteNode(nodeId, tubeId)
+                            }
+                            // УДАЛИТЕ эти параметры:
+                            // onAddEquipment = { name, nodeId, sectionId ->
+                            //     // Пока не реализовано
+                            // },
+                            // onDeleteEquipment = { id ->
+                            //     // Пока не реализовано
+                            // }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ControlPointListScreen(
+    controlPoints: List<ControlPointEntity>,
+    onControlPointClick: (ControlPointEntity) -> Unit,
+    onAddControlPoint: (String, String) -> Unit,
+    onDeleteControlPoint: (Long) -> Unit,
+    onEditControlPoint: (Long, String, String) -> Unit
+) {
+    var showAddDialog by remember { mutableStateOf(false) }
+    var showEditDialog by remember { mutableStateOf(false) }
+    var editingControlPoint by remember { mutableStateOf<ControlPointEntity?>(null) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Text(text = "Список КП", style = MaterialTheme.typography.h5)
+        Spacer(modifier = Modifier.height(16.dp))
+
+        LazyColumn(modifier = Modifier.weight(1f)) {
+            items(controlPoints) { cp ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    elevation = 4.dp
+                ) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Название КП - клик для перехода к деталям
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clickable { onControlPointClick(cp) }
+                        ) {
+                            Text(text = cp.name, style = MaterialTheme.typography.body1)
+                            if (cp.description.isNotEmpty()) {
+                                Text(
+                                    text = cp.description,
+                                    style = MaterialTheme.typography.body2,
+                                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
+                                )
+                            }
+                        }
+
+                        // Кнопка редактирования
+                        IconButton(
+                            onClick = {
+                                editingControlPoint = cp
+                                showEditDialog = true
+                            }
+                        ) {
+                            Icon(Icons.Default.Edit, contentDescription = "Редактировать КП") // ИСПРАВЛЕНО: Add → Edit
+                        }
+
+                        // Кнопка удаления
+                        IconButton(onClick = { onDeleteControlPoint(cp.id) }) {
+                            Icon(Icons.Default.Delete, contentDescription = "Удалить КП")
+                        }
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(
+            onClick = { showAddDialog = true },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Добавить КП")
+        }
+    }
+
+    // Диалог добавления КП
+    if (showAddDialog) {
+        EditNameDialog(
+            currentName = "",
+            currentDescription = "",
+            title = "Добавить КП",
+            nameHint = "Название КП",
+            descriptionHint = "Описание КП",
+            onDismiss = { showAddDialog = false },
+            onConfirm = { name, description ->
+                onAddControlPoint(name, description)
+                showAddDialog = false
+            }
+        )
+    }
+
+    // Диалог редактирования КП
+    if (showEditDialog && editingControlPoint != null) {
+        EditNameDialog(
+            currentName = editingControlPoint!!.name,
+            currentDescription = editingControlPoint!!.description,
+            title = "Редактировать КП",
+            nameHint = "Название КП",
+            descriptionHint = "Описание КП",
+            onDismiss = {
+                showEditDialog = false
+                editingControlPoint = null
+            },
+            onConfirm = { newName, newDescription ->
+                editingControlPoint?.let { cp ->
+                    onEditControlPoint(cp.id, newName, newDescription)
+                }
+                showEditDialog = false
+                editingControlPoint = null
+            }
+        )
+    }
+}
+
+package com.example.kipia.ui
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.example.kipia.database.ControlPointEntity
+import com.example.kipia.database.PKUEntity
+import com.example.kipia.database.TubeEntity
+
+@Composable
+fun ControlPointDetailScreen(
+    controlPoint: ControlPointEntity,
+    pkuViewModel: PKUViewModel,
+    tubeViewModel: TubeViewModel,
+    nodeViewModel: NodeViewModel,
+    onBackClick: () -> Unit,
+    onAddPKU: (String, String) -> Unit,
+    onDeletePKU: (Long) -> Unit,
+    onAddTube: (String) -> Unit,
+    onDeleteTube: (Long) -> Unit,
+    onAddNode: (String, Long, com.example.kipia.model.NodeType) -> Unit,
+    onDeleteNode: (Long, Long) -> Unit
+) {
+    val pkus by pkuViewModel.pkus.collectAsState()
+    val tubes by tubeViewModel.tubes.collectAsState()
+
+    var showAddPKUDialog by remember { mutableStateOf(false) }
+    var showAddTubeDialog by remember { mutableStateOf(false) }
+    var showEditControlPointDialog by remember { mutableStateOf(false) }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(controlPoint.name) },
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Назад")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { showEditControlPointDialog = true }) {
+                        Icon(Icons.Default.Edit, contentDescription = "Редактировать КП")
+                    }
+                }
+            )
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            if (controlPoint.description.isNotEmpty()) {
+                Text(
+                    text = controlPoint.description,
+                    style = MaterialTheme.typography.body2,
+                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f),
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+            }
+
+            // Секция ПКУ
+            Text("ПКУ", style = MaterialTheme.typography.h6)
+            Spacer(modifier = Modifier.height(8.dp))
+
+            LazyColumn(modifier = Modifier.weight(1f)) {
+                items(pkus) { pku ->
+                    PKUItem(
+                        pku = pku,
+                        onDelete = { onDeletePKU(pku.id) }
+                    )
+                }
+            }
+
+            Button(
+                onClick = { showAddPKUDialog = true },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(Icons.Default.Add, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Добавить ПКУ")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Секция Труб
+            Text("Трубы", style = MaterialTheme.typography.h6)
+            Spacer(modifier = Modifier.height(8.dp))
+
+            LazyColumn(modifier = Modifier.weight(1f)) {
+                items(tubes) { tube ->
+                    TubeItem(
+                        tube = tube,
+                        nodeViewModel = nodeViewModel,
+                        onDelete = { onDeleteTube(tube.id) },
+                        onAddNode = { name, type -> onAddNode(name, tube.id, type) },
+                        onDeleteNode = { nodeId -> onDeleteNode(nodeId, tube.id) }
+                    )
+                }
+            }
+
+            Button(
+                onClick = { showAddTubeDialog = true },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(Icons.Default.Add, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Добавить трубу")
+            }
+        }
+    }
+
+    // Диалог добавления ПКУ
+    if (showAddPKUDialog) {
+        AddPKUDialog(
+            onDismiss = { showAddPKUDialog = false },
+            onConfirm = { name, description ->
+                onAddPKU(name, description)
+                showAddPKUDialog = false
+            }
+        )
+    }
+
+    // Диалог добавления трубы
+    if (showAddTubeDialog) {
+        AddTubeDialog(
+            onDismiss = { showAddTubeDialog = false },
+            onConfirm = { name ->
+                onAddTube(name)
+                showAddTubeDialog = false
+            }
+        )
+    }
+
+    // Диалог редактирования КП
+    if (showEditControlPointDialog) {
+        EditNameDialog(
+            currentName = controlPoint.name,
+            currentDescription = controlPoint.description,
+            title = "Редактировать КП",
+            nameHint = "Название КП",
+            descriptionHint = "Описание КП",
+            onDismiss = { showEditControlPointDialog = false },
+            onConfirm = { newName, newDescription ->
+                // TODO: Реализовать редактирование КП
+                showEditControlPointDialog = false
+            }
+        )
+    }
+}
+
+@Composable
+fun PKUItem(
+    pku: PKUEntity,
+    onDelete: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        elevation = 2.dp
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(text = pku.name, style = MaterialTheme.typography.body1)
+                if (pku.description.isNotEmpty()) {
+                    Text(
+                        text = pku.description,
+                        style = MaterialTheme.typography.body2,
+                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
+                    )
+                }
+            }
+            IconButton(onClick = onDelete) {
+                Icon(Icons.Default.Delete, contentDescription = "Удалить ПКУ")
+            }
+        }
+    }
+}
+
+@Composable
+fun TubeItem(
+    tube: TubeEntity,
+    nodeViewModel: NodeViewModel,
+    onDelete: () -> Unit,
+    onAddNode: (String, com.example.kipia.model.NodeType) -> Unit,
+    onDeleteNode: (Long) -> Unit
+) {
+    val nodes by nodeViewModel.nodes.collectAsState()
+    var showAddNodeDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(tube.id) {
+        nodeViewModel.loadNodesByTubeId(tube.id)
+    }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        elevation = 2.dp
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = tube.name,
+                    style = MaterialTheme.typography.body1,
+                    modifier = Modifier.weight(1f)
+                )
+                IconButton(onClick = { showAddNodeDialog = true }) {
+                    Icon(Icons.Default.Add, contentDescription = "Добавить объект")
+                }
+                IconButton(onClick = onDelete) {
+                    Icon(Icons.Default.Delete, contentDescription = "Удалить трубу")
+                }
+            }
+
+            nodes.forEach { node ->
+                NodeItem(
+                    node = node,
+                    onDelete = { onDeleteNode(node.id) }
+                )
+            }
+        }
+    }
+
+    if (showAddNodeDialog) {
+        AddNodeDialog(
+            onDismiss = { showAddNodeDialog = false },
+            onConfirm = { name, type ->
+                onAddNode(name, type)
+                showAddNodeDialog = false
+            }
+        )
+    }
+}
+
+@Composable
+fun NodeItem(
+    node: com.example.kipia.database.NodeEntity,
+    onDelete: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, top = 4.dp),
+        elevation = 1.dp
+    ) {
+        Row(
+            modifier = Modifier.padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = node.name,
+                style = MaterialTheme.typography.body2,
+                modifier = Modifier.weight(1f)
+            )
+            IconButton(
+                onClick = onDelete,
+                modifier = Modifier.size(24.dp)
+            ) {
+                Icon(
+                    Icons.Default.Delete,
+                    contentDescription = "Удалить объект",
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+        }
+    }
+}
