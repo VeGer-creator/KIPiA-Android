@@ -2,6 +2,7 @@ package com.example.kipia.database
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
@@ -11,17 +12,14 @@ import androidx.room.PrimaryKey
             entity = PKUEntity::class,
             parentColumns = ["id"],
             childColumns = ["pkuId"],
-            onDelete = ForeignKey.CASCADE // Если ПКУ удалится, отсек тоже удалится
+            onDelete = ForeignKey.CASCADE
         )
-    ]
+    ],
+    indices = [Index(value = ["pkuId"])] // ДОБАВИТЬ ЭТУ СТРОКУ
 )
 data class SectionEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0L,
-
-    // Название отсека, например "Инженерный отсек", "Трансформаторный отсек"
     val name: String,
-
-    // ID ПКУ, к которому принадлежит отсек
     val pkuId: Long
 )

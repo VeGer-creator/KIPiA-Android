@@ -1,7 +1,9 @@
+// app/src/main/java/com/example/kipia/database/NodeEntity.kt
 package com.example.kipia.database
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
@@ -13,18 +15,14 @@ import androidx.room.PrimaryKey
             childColumns = ["tubeId"],
             onDelete = ForeignKey.CASCADE
         )
-    ]
+    ],
+    indices = [Index(value = ["tubeId"])] // ДОБАВИТЬ ЭТУ СТРОКУ
 )
 data class NodeEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0L,
-
-    // Название узла, например "ОД 937/1", "В 937/1", "Задвижка"
     val name: String,
-
-    // ID трубы, к которой принадлежит узел
     val tubeId: Long,
-
-    // Тип узла как строка
-    val nodeType: String
+    val nodeType: String,
+    val orderIndex: Int = 0
 )

@@ -1,38 +1,41 @@
-Executing tasks: [clean] in project E:\AndroidStudioProjects\KIPiA_1.0
+> Task :app:compileDebugKotlin
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/MainActivity.kt:38:76 Unresolved reference 'getDatabase'.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/MainActivity.kt:59:71 Unresolved reference 'getDatabase'.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/MainActivity.kt:62:72 Unresolved reference 'getDatabase'.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/MainActivity.kt:65:72 Unresolved reference 'getDatabase'.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/ui/ControlPointDetailScreen.kt:42:60 Unresolved reference 'getDatabase'.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/ui/ControlPointDetailScreen.kt:51:26 Cannot infer type for this parameter. Please specify it explicitly.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/ui/ControlPointDetailScreen.kt:51:26 Property delegate must have a 'getValue(Nothing?, KProperty0<ERROR CLASS: Cannot infer argument for type parameter T>)' method. None of the following functions is applicable:
+fun <T> State<T>.getValue(thisObj: Any?, property: KProperty<*>): T
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/ui/ControlPointDetailScreen.kt:51:40 Unresolved reference 'isLoading'.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/ui/ControlPointDetailScreen.kt:51:50 Cannot infer type for this parameter. Please specify it explicitly.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/ui/ControlPointDetailScreen.kt:55:22 Cannot infer type for this parameter. Please specify it explicitly.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/ui/ControlPointDetailScreen.kt:55:22 Property delegate must have a 'getValue(Nothing?, KProperty0<ERROR CLASS: Cannot infer argument for type parameter T>)' method. None of the following functions is applicable:
+fun <T> State<T>.getValue(thisObj: Any?, property: KProperty<*>): T
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/ui/ControlPointDetailScreen.kt:55:36 Unresolved reference 'errorMessage'.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/ui/ControlPointDetailScreen.kt:55:49 Cannot infer type for this parameter. Please specify it explicitly.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/ui/ControlPointDetailScreen.kt:70:26 No value passed for parameter 'drawerState'.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/ui/ControlPointDetailScreen.kt:70:26 No value passed for parameter 'snackbarHostState'.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/ui/ControlPointDetailScreen.kt:79:20 Cannot infer type for this parameter. Please specify it explicitly.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/ui/ControlPointDetailScreen.kt:79:20 Not enough information to infer type argument for 'T'.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/ui/ControlPointDetailScreen.kt:79:26 Cannot infer type for this parameter. Please specify it explicitly.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/ui/ControlPointDetailScreen.kt:81:26 No value passed for parameter 'drawerState'.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/ui/ControlPointDetailScreen.kt:81:26 No value passed for parameter 'snackbarHostState'.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/ui/ControlPointDetailScreen.kt:85:27 Unresolved reference 'clearError'.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/ui/ControlPointDetailScreen.kt:105:36 Unresolved reference 'TextOverflow'.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/ui/ControlPointDetailScreen.kt:185:37 Unresolved reference 'PKUItem'.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/ui/SimpleDragDropList.kt:13:12 Unresolved reference 'burnoutcrew'.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/ui/SimpleDragDropList.kt:14:12 Unresolved reference 'burnoutcrew'.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/ui/SimpleDragDropList.kt:15:12 Unresolved reference 'burnoutcrew'.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/ui/SimpleDragDropList.kt:25:17 Unresolved reference 'rememberReorderableLazyListState'.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/ui/SimpleDragDropList.kt:26:20 Cannot infer type for this parameter. Please specify it explicitly.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/ui/SimpleDragDropList.kt:26:26 Cannot infer type for this parameter. Please specify it explicitly.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/ui/SimpleDragDropList.kt:27:25 Unresolved reference 'index'.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/ui/SimpleDragDropList.kt:27:35 Unresolved reference 'index'.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/ui/SimpleDragDropList.kt:33:29 Unresolved reference 'reorderable'.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/ui/SimpleDragDropList.kt:44:13 Unresolved reference 'ReorderableItem'.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/ui/SimpleDragDropList.kt:44:51 Cannot infer type for this parameter. Please specify it explicitly.
+e: file:///E:/AndroidStudioProjects/KIPiA_1.0/app/src/main/java/com/example/kipia/ui/SimpleDragDropList.kt:45:17 @Composable invocations can only happen from the context of a @Composable function
 
+> Task :app:compileDebugKotlin FAILED
 
-> Configure project :
-e: file:///E:/AndroidStudioProjects/KIPiA_1.0/build.gradle.kts:8:1: Unresolved reference: dependencyResolutionManagement
-e: file:///E:/AndroidStudioProjects/KIPiA_1.0/build.gradle.kts:9:5: Unresolved reference: repositoriesMode
-e: file:///E:/AndroidStudioProjects/KIPiA_1.0/build.gradle.kts:21:1: Val cannot be reassigned
-e: file:///E:/AndroidStudioProjects/KIPiA_1.0/build.gradle.kts:22:1: Unresolved reference: include
-
-FAILURE: Build failed with an exception.
-
-* Where:
-Build file 'E:\AndroidStudioProjects\KIPiA_1.0\build.gradle.kts' line: 8
-
-* What went wrong:
-Script compilation errors:
-
-  Line 08: dependencyResolutionManagement {
-           ^ Unresolved reference: dependencyResolutionManagement
-
-  Line 09:     repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
-               ^ Unresolved reference: repositoriesMode
-
-  Line 21: rootProject.name = "KIPiA"
-           ^ Val cannot be reassigned
-
-  Line 22: include(":app")
-           ^ Unresolved reference: include
-
-4 errors
-
-* Try:
-> Run with --stacktrace option to get the stack trace.
-> Run with --info or --debug option to get more log output.
-> Run with --scan to get full insights.
-> Get more help at https://help.gradle.org.
-
-BUILD FAILED in 12s

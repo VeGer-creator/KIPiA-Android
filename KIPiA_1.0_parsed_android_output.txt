@@ -14,9 +14,13 @@ KIPiA_1.0/
   gradle.properties
   gradlew
   gradlew.bat
+  hs_err_pid11964.log
+  hs_err_pid5352.log
+  hs_err_pid7172.log
   KIPiA_1.0_parsed_android_output.txt
   KIPiA_1.0_parsed_output.txt
   local.properties
+  replay_pid11964.log
   settings.gradle.kts
   .kotlin/
     errors/
@@ -46,36 +50,71 @@ KIPiA_1.0/
                   AppDatabase.kt
                   ControlPointDao.kt
                   ControlPointEntity.kt
+                  DetailedEquipmentDao.kt
+                  DetailedEquipmentEntity.kt
                   EquipmentDao.kt
                   EquipmentEntity.kt
+                  EventDao.kt
+                  EventEntity.kt
                   NodeDao.kt
                   NodeEntity.kt
                   PKUDao.kt
                   PKUEntity.kt
+                  RemarkDao.kt
+                  RemarkEntity.kt
                   SectionDao.kt
                   SectionEntity.kt
                   TubeDao.kt
                   TubeEntity.kt
                 model/
+                  EquipmentType.kt
                   NodeType.kt
                   PKU.kt
+                  SectionType.kt
                   Tube.kt
                 ui/
+                  AddEquipmentDialog.kt
                   AddNodeDialog.kt
+                  AddPKUDialog.kt
+                  AddSectionDialog.kt
+                  AddSectionEquipmentDialog.kt
+                  AddTubeDialog.kt
+                  AdvancedDragDropList.kt
+                  ControlPointDetailScreen.kt
+                  ControlPointListScreen.kt
                   ControlPointViewModel.kt
                   ControlPointViewModelFactory.kt
+                  DraggableNodeItem.kt
+                  EditEquipmentScreen.kt
                   EditNameDialog.kt
+                  EquipmentDetailScreen.kt
+                  EquipmentViewModel.kt
+                  EquipmentViewModelFactory.kt
+                  EventViewModel.kt
+                  EventViewModelFactory.kt
+                  NodeItem.kt
+                  NodeItemWithEquipment.kt
                   NodeViewModel.kt
                   NodeViewModelFactory.kt
+                  PKUItem.kt
                   PKUViewModel.kt
                   PKUViewModelFactory.kt
+                  RemarkViewModel.kt
+                  RemarkViewModelFactory.kt
+                  SectionViewModel.kt
+                  SimpleDragDropList.kt
+                  SimpleDraggableNodeItem.kt
+                  TubeItem.kt
                   TubeViewModel.kt
                   TubeViewModelFactory.kt
+                  ViewEquipmentScreen.kt
                   theme/
                     Color.kt
                     Shapes.kt
                     Theme.kt
                     Typography.kt
+                utils/
+                  NameUtils.kt
         res/
           drawable/
             ic_launcher_background.xml
@@ -114,6 +153,7 @@ KIPiA_1.0/
                 ExampleUnitTest.kt
   error/
     err1.txt
+    err10.txt
     err2.txt
     err3.txt
     err4.txt
@@ -121,9 +161,12 @@ KIPiA_1.0/
     err6.txt
     err7.txt
     err8.txt
+    err9.txt
     File.txt
     File1.txt
-    Структура.txt
+    File2.txt
+    Структура и описание.txt
+    Характеристики_Оборудования.txt
   gradle/
     libs.versions.toml
     wrapper/
@@ -185,6 +228,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true
+
     }
 
     buildTypes {
@@ -224,7 +269,7 @@ dependencies {
     implementation("androidx.compose.material:material")
     implementation("androidx.activity:activity-compose:1.8.0")
 
-    // Room - обновляем версии
+    // Room
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     kapt("androidx.room:room-compiler:2.6.1")
@@ -236,6 +281,10 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
+
+    // УДАЛИТЕ эти проблемные зависимости:
+    // implementation("com.google.accompanist:accompanist-navigation-animation:0.31.6-rc")
+    // implementation("org.burnoutcrew:reorderable:0.9.6")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
@@ -287,11 +336,10 @@ class ExampleInstrumentedTest {
 // app/src/main/java/com/example/kipia/database/AppDatabase.kt
 package com.example.kipia.database
 
-import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-
+import android.content.Context
 
 @Database(
     entities = [
@@ -300,25 +348,31 @@ import androidx.room.RoomDatabase
         TubeEntity::class,
         NodeEntity::class,
         SectionEntity::class,
-        EquipmentEntity::class
+        EquipmentEntity::class,
+        DetailedEquipmentEntity::class,
+        RemarkEntity::class,
+        EventEntity::class
     ],
-    version = 5, // Увеличиваем версию базы данных
+    version = 9, // Увеличиваем версию
     exportSchema = false
 )
 
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun controlPointDao(): ControlPointDao // Добавляем DAO для КП
+    abstract fun controlPointDao(): ControlPointDao
     abstract fun pkuDao(): PKUDao
     abstract fun tubeDao(): TubeDao
-    abstract fun nodeDao(): NodeDao // Добавляем DAO для Узла
-    abstract fun sectionDao(): SectionDao // Добавляем DAO для Отсека
+    abstract fun nodeDao(): NodeDao
+    abstract fun sectionDao(): SectionDao
     abstract fun equipmentDao(): EquipmentDao
+    abstract fun detailedEquipmentDao(): DetailedEquipmentDao // ДОБАВИТЬ
+    abstract fun remarkDao(): RemarkDao // ДОБАВИТЬ
+    abstract fun eventDao(): EventDao // ДОБАВИТЬ
 
     companion object {
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
-        fun getDatabase(context: Context): AppDatabase {
+        fun getInstance(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
@@ -383,7 +437,6 @@ package com.example.kipia.database
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import androidx.room.util.copy
 
 @Entity(tableName = "control_point_table")
 data class ControlPointEntity(
@@ -398,6 +451,108 @@ data class ControlPointEntity(
 
 )
 
+
+----------------------------------------
+
+------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\DetailedEquipmentDao.kt ---
+------------------------------------------------------------
+
+// app/src/main/java/com/example/kipia/database/dao/DetailedEquipmentDao.kt
+package com.example.kipia.database
+
+import androidx.room.*
+import com.example.kipia.database.DetailedEquipmentEntity
+
+@Dao
+interface DetailedEquipmentDao {
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(equipment: DetailedEquipmentEntity)
+
+    @Query("SELECT * FROM detailed_equipment_table WHERE nodeId = :nodeId")
+    suspend fun getEquipmentByNodeId(nodeId: Long): List<DetailedEquipmentEntity>
+
+    @Query("SELECT * FROM detailed_equipment_table WHERE sectionId = :sectionId")
+    suspend fun getEquipmentBySectionId(sectionId: Long): List<DetailedEquipmentEntity>
+
+    @Query("SELECT * FROM detailed_equipment_table WHERE id = :id")
+    suspend fun getEquipmentById(id: Long): DetailedEquipmentEntity?
+
+    @Update
+    suspend fun update(equipment: DetailedEquipmentEntity)
+
+    @Delete
+    suspend fun delete(equipment: DetailedEquipmentEntity)
+
+    @Query("DELETE FROM detailed_equipment_table WHERE nodeId = :nodeId")
+    suspend fun deleteByNodeId(nodeId: Long)
+
+    @Query("DELETE FROM detailed_equipment_table WHERE sectionId = :sectionId")
+    suspend fun deleteBySectionId(sectionId: Long)
+}
+----------------------------------------
+
+------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\DetailedEquipmentEntity.kt ---
+------------------------------------------------------------
+
+// DetailedEquipmentEntity.kt
+package com.example.kipia.database
+
+import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Index
+import androidx.room.PrimaryKey
+
+@Entity(
+    tableName = "detailed_equipment_table",
+    foreignKeys = [
+        ForeignKey(
+            entity = NodeEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["nodeId"],
+            onDelete = ForeignKey.CASCADE
+        ),
+        ForeignKey(
+            entity = SectionEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["sectionId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [
+        Index(value = ["nodeId"]),
+        Index(value = ["sectionId"])
+    ]
+)
+data class DetailedEquipmentEntity(
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0L,
+    val equipmentType: String, // Тип оборудования из EquipmentType
+    val name: String, // Название оборудования
+    val nodeId: Long? = null, // Привязка к узлу (ОД, В, Задвижка)
+    val sectionId: Long? = null, // Привязка к отсеку ПКУ
+
+    // Общие характеристики
+    val model: String = "",
+    val manufacturer: String = "",
+    val serialNumber: String = "",
+    val productionYear: String = "",
+    val verificationYear: String = "",
+
+    // Специфические характеристики
+    val nominal: String = "", // Номинал
+    val pressureLimit: String = "", // Граница давления для манометров
+    val softwareVersion: String = "", // Версия ПО
+    val mo: String = "", // МО
+    val mz: String = "", // МЗ
+    val mto: String = "", // МТО
+    val mtz: String = "", // МТЗ
+    val muo: String = "", // МУО
+    val muz: String = "", // МУЗ
+    val outputContacts: String = "" // Кол.об.вых.зв
+)
 
 ----------------------------------------
 
@@ -447,6 +602,7 @@ package com.example.kipia.database
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
@@ -456,30 +612,26 @@ import androidx.room.PrimaryKey
             entity = NodeEntity::class,
             parentColumns = ["id"],
             childColumns = ["nodeId"],
-            onDelete = ForeignKey.CASCADE // Если Узел удалится, оборудование тоже удалится
+            onDelete = ForeignKey.CASCADE
         ),
         ForeignKey(
             entity = SectionEntity::class,
             parentColumns = ["id"],
             childColumns = ["sectionId"],
-            onDelete = ForeignKey.CASCADE // Если Отсек удалится, оборудование тоже удалится
+            onDelete = ForeignKey.CASCADE
         )
+    ],
+    indices = [
+        Index(value = ["nodeId"]), // ДОБАВИТЬ ЭТУ СТРОКУ
+        Index(value = ["sectionId"]) // ДОБАВИТЬ ЭТУ СТРОКУ
     ]
 )
 data class EquipmentEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0L,
-
-    // Название оборудования, например "Сигнализатор затопления", "Электропривод"
     val name: String,
-
-    // ID узла, к которому принадлежит оборудование (может быть null)
     val nodeId: Long? = null,
-
-    // ID отсека, к которому принадлежит оборудование (может быть null)
     val sectionId: Long? = null,
-
-    // Модель, завод, номер, номинал, год поверки и т.д. - добавим позже
     val model: String = "",
     val manufacturer: String = "",
     val serialNumber: String = "",
@@ -489,9 +641,59 @@ data class EquipmentEntity(
 ----------------------------------------
 
 ------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\EventDao.kt ---
+------------------------------------------------------------
+
+// app/src/main/java/com/example/kipia/database/EventDao.kt
+package com.example.kipia.database
+
+import androidx.room.*
+import com.example.kipia.database.EventEntity
+
+@Dao
+interface EventDao {
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(event: EventEntity)
+
+    @Query("SELECT * FROM event_table WHERE controlPointId = :controlPointId")
+    suspend fun getEventsByControlPointId(controlPointId: Long): List<EventEntity>
+
+    @Update
+    suspend fun update(event: EventEntity)
+
+    @Delete
+    suspend fun delete(event: EventEntity)
+}
+----------------------------------------
+
+------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\EventEntity.kt ---
+------------------------------------------------------------
+
+// app/src/main/java/com/example/kipia/database/EventEntity.kt
+package com.example.kipia.database
+
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "event_table")
+data class EventEntity(
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0L,
+    val controlPointId: Long,
+    val title: String,
+    val description: String,
+    val date: String,
+    val isCompleted: Boolean = false
+)
+----------------------------------------
+
+------------------------------------------------------------
 --- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\NodeDao.kt ---
 ------------------------------------------------------------
 
+// app/src/main/java/com/example/kipia/database/NodeDao.kt
 package com.example.kipia.database
 
 import androidx.room.Dao
@@ -499,6 +701,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Delete
+import androidx.room.Update
 
 @Dao
 interface NodeDao {
@@ -509,7 +712,7 @@ interface NodeDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(nodes: List<NodeEntity>)
 
-    @Query("SELECT * FROM node_table WHERE tubeId = :tubeId")
+    @Query("SELECT * FROM node_table WHERE tubeId = :tubeId ORDER BY orderIndex ASC")
     suspend fun getNodesByTubeId(tubeId: Long): List<NodeEntity>
 
     @Query("SELECT * FROM node_table WHERE id = :id")
@@ -523,6 +726,12 @@ interface NodeDao {
 
     @Query("UPDATE node_table SET name = :name WHERE id = :id")
     suspend fun update(id: Long, name: String)
+
+    @Query("UPDATE node_table SET orderIndex = :orderIndex WHERE id = :id")
+    suspend fun updateOrder(id: Long, orderIndex: Int)
+
+    @Update
+    suspend fun updateNode(node: NodeEntity)
 }
 ----------------------------------------
 
@@ -530,10 +739,12 @@ interface NodeDao {
 --- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\NodeEntity.kt ---
 ------------------------------------------------------------
 
+// app/src/main/java/com/example/kipia/database/NodeEntity.kt
 package com.example.kipia.database
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
@@ -545,20 +756,16 @@ import androidx.room.PrimaryKey
             childColumns = ["tubeId"],
             onDelete = ForeignKey.CASCADE
         )
-    ]
+    ],
+    indices = [Index(value = ["tubeId"])] // ДОБАВИТЬ ЭТУ СТРОКУ
 )
 data class NodeEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0L,
-
-    // Название узла, например "ОД 937/1", "В 937/1", "Задвижка"
     val name: String,
-
-    // ID трубы, к которой принадлежит узел
     val tubeId: Long,
-
-    // Тип узла как строка
-    val nodeType: String
+    val nodeType: String,
+    val orderIndex: Int = 0
 )
 ----------------------------------------
 
@@ -611,6 +818,7 @@ package com.example.kipia.database
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
@@ -620,22 +828,96 @@ import androidx.room.PrimaryKey
             entity = ControlPointEntity::class,
             parentColumns = ["id"],
             childColumns = ["controlPointId"],
-            onDelete = ForeignKey.CASCADE // Если КП удалится, ПКУ тоже удалится
+            onDelete = ForeignKey.CASCADE
         )
-    ]
+    ],
+    indices = [Index(value = ["controlPointId"])] // ДОБАВИТЬ ЭТУ СТРОКУ
 )
 data class PKUEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0L,
-
     val name: String,
     val description: String = "",
     val isCompleted: Boolean = false,
-
-    // ID связанного КП
     val controlPointId: Long
 )
+----------------------------------------
 
+------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\RemarkDao.kt ---
+------------------------------------------------------------
+
+// app/src/main/java/com/example/kipia/database/RemarkDao.kt
+package com.example.kipia.database
+
+import androidx.room.*
+import com.example.kipia.database.RemarkEntity
+
+@Dao
+interface RemarkDao {
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(remark: RemarkEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(remarks: List<RemarkEntity>)
+
+    @Query("SELECT * FROM remark_table WHERE controlPointId = :controlPointId")
+    suspend fun getRemarksByControlPointId(controlPointId: Long): List<RemarkEntity>
+
+    @Query("SELECT * FROM remark_table WHERE id = :id")
+    suspend fun getRemarkById(id: Long): RemarkEntity?
+
+    @Query("UPDATE remark_table SET isCompleted = :isCompleted, completionDate = :completionDate WHERE id = :id")
+    suspend fun updateCompletionStatus(id: Long, isCompleted: Boolean, completionDate: String)
+
+    @Update
+    suspend fun update(remark: RemarkEntity)
+
+    @Delete
+    suspend fun delete(remark: RemarkEntity)
+
+    @Query("DELETE FROM remark_table WHERE controlPointId = :controlPointId")
+    suspend fun deleteByControlPointId(controlPointId: Long)
+}
+----------------------------------------
+
+------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\RemarkEntity.kt ---
+------------------------------------------------------------
+
+// app/src/main/java/com/example/kipia/database/RemarkEntity.kt
+package com.example.kipia.database
+
+import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Index
+import androidx.room.PrimaryKey
+
+@Entity(
+    tableName = "remark_table",
+    foreignKeys = [
+        ForeignKey(
+            entity = ControlPointEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["controlPointId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [Index(value = ["controlPointId"])]
+)
+data class RemarkEntity(
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0L,
+    val controlPointId: Long,
+    val remarkNumber: String, // Номер замечания
+    val description: String, // Описание замечания
+    val deadline: String, // Срок устранения
+    val commission: Boolean = false, // Замечание комиссии
+    val isCompleted: Boolean = false, // Выполнено
+    val completionDate: String = "", // Дата выполнения
+    val photosPath: String = "" // Пути к фотографиям (разделенные запятыми)
+)
 ----------------------------------------
 
 ------------------------------------------------------------
@@ -681,6 +963,7 @@ package com.example.kipia.database
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
@@ -690,18 +973,15 @@ import androidx.room.PrimaryKey
             entity = PKUEntity::class,
             parentColumns = ["id"],
             childColumns = ["pkuId"],
-            onDelete = ForeignKey.CASCADE // Если ПКУ удалится, отсек тоже удалится
+            onDelete = ForeignKey.CASCADE
         )
-    ]
+    ],
+    indices = [Index(value = ["pkuId"])] // ДОБАВИТЬ ЭТУ СТРОКУ
 )
 data class SectionEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0L,
-
-    // Название отсека, например "Инженерный отсек", "Трансформаторный отсек"
     val name: String,
-
-    // ID ПКУ, к которому принадлежит отсек
     val pkuId: Long
 )
 ----------------------------------------
@@ -752,6 +1032,7 @@ package com.example.kipia.database
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
@@ -761,22 +1042,17 @@ import androidx.room.PrimaryKey
             entity = ControlPointEntity::class,
             parentColumns = ["id"],
             childColumns = ["controlPointId"],
-            onDelete = ForeignKey.CASCADE // Если КП удалится, труба тоже удалится
+            onDelete = ForeignKey.CASCADE
         )
-    ]
+    ],
+    indices = [Index(value = ["controlPointId"])] // ДОБАВИТЬ ЭТУ СТРОКУ
 )
 data class TubeEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0L,
-
-    // Название трубы, например "МН СП" или "МН ХК"
     val name: String,
-
-    // ID КП, к которому принадлежит труба
     val controlPointId: Long
-
 )
-
 ----------------------------------------
 
 ------------------------------------------------------------
@@ -788,30 +1064,17 @@ package com.example.kipia
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.kipia.database.AppDatabase
 import com.example.kipia.database.ControlPointEntity
-import com.example.kipia.database.NodeEntity
-import com.example.kipia.database.TubeEntity
-import com.example.kipia.model.NodeType
 import com.example.kipia.ui.*
 import com.example.kipia.ui.theme.KIPITheme
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.Surface
+import androidx.compose.material.MaterialTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -824,34 +1087,53 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val context = LocalContext.current
                     val controlPointViewModel: ControlPointViewModel = viewModel(
-                        factory = ControlPointViewModelFactory(AppDatabase.getDatabase(context))
+                        factory = ControlPointViewModelFactory(AppDatabase.getInstance(context))
                     )
                     val controlPoints by controlPointViewModel.controlPoints.collectAsState()
 
                     // Поднимаем состояние выбора КП в MainActivity
                     var selectedControlPoint by remember { mutableStateOf<ControlPointEntity?>(null) }
 
+                    // Обработка кнопки "Назад"
+                    DisposableEffect(Unit) {
+                        val callback = androidx.activity.compose.LocalOnBackPressedDispatcherOwner.current
+                            ?.onBackPressedDispatcher?.addCallback(this) {
+                                if (selectedControlPoint != null) {
+                                    selectedControlPoint = null
+                                } else {
+                                    finish()
+                                }
+                            }
+                        onDispose {
+                            callback?.remove()
+                        }
+                    }
+
                     if (selectedControlPoint == null) {
                         // Показываем список КП
                         ControlPointListScreen(
                             controlPoints = controlPoints,
-                            onControlPointClick = { cp -> selectedControlPoint = cp },
-                            onAddControlPoint = { name, desc -> controlPointViewModel.addControlPoint(name, desc) },
-                            onDeleteControlPoint = { id -> controlPointViewModel.deleteControlPoint(id) },
-                            onEditControlPoint = { id, newName, description ->
+                            onControlPointClick = { cp: ControlPointEntity -> selectedControlPoint = cp },
+                            onAddControlPoint = { name: String, desc: String ->
+                                controlPointViewModel.addControlPoint(name, desc)
+                            },
+                            onDeleteControlPoint = { id: Long ->
+                                controlPointViewModel.deleteControlPoint(id)
+                            },
+                            onEditControlPoint = { id: Long, newName: String, description: String ->
                                 controlPointViewModel.updateControlPoint(id, newName, description)
                             }
                         )
                     } else {
-                        // Показываем ПКУ и Трубы для выбранного КП
+                        // Показываем ПКУ и Участки МН для выбранного КП
                         val pkuViewModel: PKUViewModel = viewModel(
-                            factory = PKUViewModelFactory(AppDatabase.getDatabase(context))
+                            factory = PKUViewModelFactory(AppDatabase.getInstance(context))
                         )
                         val tubeViewModel: TubeViewModel = viewModel(
-                            factory = TubeViewModelFactory(AppDatabase.getDatabase(context))
+                            factory = TubeViewModelFactory(AppDatabase.getInstance(context))
                         )
                         val nodeViewModel: NodeViewModel = viewModel(
-                            factory = NodeViewModelFactory(AppDatabase.getDatabase(context))
+                            factory = NodeViewModelFactory(AppDatabase.getInstance(context))
                         )
 
                         // Загружаем данные при изменении selectedControlPoint
@@ -868,37 +1150,31 @@ class MainActivity : ComponentActivity() {
                             tubeViewModel = tubeViewModel,
                             nodeViewModel = nodeViewModel,
                             onBackClick = { selectedControlPoint = null },
-                            onAddPKU = { name, desc ->
+                            onAddPKU = { name: String, desc: String ->
                                 selectedControlPoint?.let { cp ->
                                     pkuViewModel.addPKU(name, desc, cp.id)
                                 }
                             },
-                            onDeletePKU = { id ->
+                            onDeletePKU = { id: Long ->
                                 selectedControlPoint?.let { cp ->
                                     pkuViewModel.deletePKU(id, cp.id)
                                 }
                             },
-                            onAddTube = { name ->
+                            onAddTube = { name: String ->
                                 selectedControlPoint?.let { cp ->
                                     tubeViewModel.addTube(name, cp.id)
                                 }
                             },
-                            onDeleteTube = { id ->
+                            onDeleteTube = { id: Long ->
                                 selectedControlPoint?.let { cp ->
                                     tubeViewModel.deleteTube(id, cp.id)
                                 }
                             },
-                            onAddNode = { name, tubeId, type ->
+                            onAddNode = { name: String, tubeId: Long, type: com.example.kipia.model.NodeType ->
                                 nodeViewModel.addNode(name, tubeId, type)
                             },
-                            onDeleteNode = { nodeId, tubeId ->
+                            onDeleteNode = { nodeId: Long, tubeId: Long ->
                                 nodeViewModel.deleteNode(nodeId, tubeId)
-                            },
-                            onAddEquipment = { name, nodeId, sectionId ->
-                                // Пока не реализовано
-                            },
-                            onDeleteEquipment = { id ->
-                                // Пока не реализовано
                             }
                         )
                     }
@@ -907,94 +1183,46 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+----------------------------------------
 
-@Composable
-fun ControlPointListScreen(
-    controlPoints: List<ControlPointEntity>,
-    onControlPointClick: (ControlPointEntity) -> Unit,
-    onAddControlPoint: (String, String) -> Unit,
-    onDeleteControlPoint: (Long) -> Unit,
-    onEditControlPoint: (Long, String, String) -> Unit
-) {
-    var showEditDialog by remember { mutableStateOf(false) }
-    var editingControlPoint by remember { mutableStateOf<ControlPointEntity?>(null) }
+------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\model\EquipmentType.kt ---
+------------------------------------------------------------
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Text(text = "Список КП", style = MaterialTheme.typography.h5)
-        Spacer(modifier = Modifier.height(16.dp))
-        LazyColumn {
-            items(controlPoints) { cp ->
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp),
-                    elevation = 4.dp
-                ) {
-                    Row(
-                        modifier = Modifier.padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        // Название КП - клик для перехода к деталям
-                        Column(
-                            modifier = Modifier
-                                .weight(1f)
-                                .clickable { onControlPointClick(cp) }
-                        ) {
-                            Text(text = cp.name, style = MaterialTheme.typography.body1)
-                            if (cp.description.isNotEmpty()) {
-                                Text(
-                                    text = cp.description,
-                                    style = MaterialTheme.typography.body2,
-                                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
-                                )
-                            }
-                        }
+package com.example.kipia.model
 
-                        // Кнопка редактирования
-                        IconButton(
-                            onClick = {
-                                editingControlPoint = cp
-                                showEditDialog = true
-                            }
-                        ) {
-                            Icon(Icons.Default.Add, contentDescription = "Редактировать КП")
-                        }
+enum class EquipmentType(val displayName: String) {
+    // Оборудование для узлов (ОД, В)
+    FLOOD_DETECTOR("Сигнализатор затопления"),
+    OPENING_DETECTOR("Сигнализатор вскрытия"),
+    PRESSURE_GAUGE("Манометр давления"),
+    PRESSURE_TRANSDUCER("Преобразователь давления"),
+    DPS("ДПС"),
 
-                        // Кнопка удаления
-                        IconButton(onClick = { onDeleteControlPoint(cp.id) }) {
-                            Icon(Icons.Default.Delete, contentDescription = "Удалить КП")
-                        }
-                    }
-                }
-            }
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = { onAddControlPoint("Новое КП", "Описание") }) {
-            Text("Добавить КП")
-        }
-    }
+    // Оборудование для задвижек
+    VALVE("Задвижка"),
+    ELECTRIC_DRIVE("Эл.привод"),
+    BUR("БУР"),
+    BKP("БКП"),
 
-    // Диалог редактирования КП
-    if (showEditDialog && editingControlPoint != null) {
-        EditNameDialog(
-            currentName = editingControlPoint!!.name,
-            title = "Редактировать КП",
-            hint = "Название КП",
-            onDismiss = {
-                showEditDialog = false
-                editingControlPoint = null
-            },
-            onConfirm = { newName ->
-                editingControlPoint?.let { cp ->
-                    onEditControlPoint(cp.id, newName, cp.description)
-                }
-            }
-        )
-    }
+    // Оборудование для инженерного отсека
+    SHTM("ШТМ"),
+    FIRE_ALARM("Прибор пожаро-охранный"),
+    SMOKE_DETECTOR("Извещатель дымовой"),
+    MANUAL_DETECTOR("Извещатель ручной"),
+    SIREN("Оповещатель свето-звуковой"),
+    AIR_CONDITIONER("Кондиционер"),
+    CONTROL_PANEL("ЩСУ"),
+
+    // Оборудование для трансформаторного отсека
+    // (используем те же извещатели, но с другим контекстом)
+
+    // Дополнительное оборудование
+    TEMP_TRANSDUCER("Преобразователь температуры"),
+    UZR("УЗР"),
+    LEVEL_METER("Уровнемер"),
+    DGK("ДГК"),
+    BKEP("БКЭП")
 }
 ----------------------------------------
 
@@ -1033,6 +1261,18 @@ data class PKU(
 ----------------------------------------
 
 ------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\model\SectionType.kt ---
+------------------------------------------------------------
+
+package com.example.kipia.model
+
+enum class SectionType(val displayName: String) {
+    ENGINEERING("Инженерный отсек"),
+    TRANSFORMER("Трансформаторный отсек")
+}
+----------------------------------------
+
+------------------------------------------------------------
 --- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\model\Tube.kt ---
 ------------------------------------------------------------
 
@@ -1044,6 +1284,136 @@ data class Tube(
     val name: String, // Например, "Сургут-Полоцк" или "Холмогоры-Клин"
     val pkuId: Long // Связь с PKU
 )
+----------------------------------------
+
+------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\AddEquipmentDialog.kt ---
+------------------------------------------------------------
+
+// app/src/main/java/com/example/kipia/ui/AddEquipmentDialog.kt
+package com.example.kipia.ui
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import com.example.kipia.model.EquipmentType
+
+@Composable
+fun AddEquipmentDialog(
+    nodeId: Long? = null,
+    sectionId: Long? = null,
+    nodeName: String = "", // Добавляем параметр имени узла
+    onDismiss: () -> Unit,
+    onConfirm: (EquipmentType) -> Unit
+) {
+    var selectedType by remember { mutableStateOf(EquipmentType.FLOOD_DETECTOR) }
+
+    // Определяем доступные типы оборудования в зависимости от контекста
+    val availableEquipmentTypes = remember(nodeName) {
+        when {
+            nodeName.contains("Задвижка", ignoreCase = true) -> {
+                listOf(
+                    EquipmentType.VALVE,
+                    EquipmentType.ELECTRIC_DRIVE,
+                    EquipmentType.BUR,
+                    EquipmentType.BKP
+                )
+            }
+            nodeName.contains("ОД", ignoreCase = true) -> {
+                listOf(
+                    EquipmentType.FLOOD_DETECTOR,
+                    EquipmentType.OPENING_DETECTOR,
+                    EquipmentType.PRESSURE_GAUGE,
+                    EquipmentType.PRESSURE_TRANSDUCER,
+                    EquipmentType.DPS
+                )
+            }
+            nodeName.contains("В", ignoreCase = true) -> {
+                listOf(
+                    EquipmentType.FLOOD_DETECTOR,
+                    EquipmentType.OPENING_DETECTOR
+                )
+            }
+            else -> EquipmentType.values().toList()
+        }
+    }
+
+
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            elevation = 8.dp
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(
+                    text = "Добавить оборудование",
+                    style = MaterialTheme.typography.h6
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Выбор типа оборудования
+                Text("Выберите тип оборудования:")
+                LazyColumn(
+                    modifier = Modifier.height(200.dp)
+                ) {
+                    items(availableEquipmentTypes) { type ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { selectedType = type }
+                                .padding(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = selectedType == type,
+                                onClick = { selectedType = type }
+                            )
+                            Text(
+                                text = type.displayName,
+                                modifier = Modifier.padding(start = 8.dp)
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Кнопки
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Button(onClick = onDismiss) {
+                        Text("Отмена")
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Button(
+                        onClick = {
+                            onConfirm(selectedType)
+                            onDismiss()
+                        }
+                    ) {
+                        Text("Добавить")
+                    }
+                }
+            }
+        }
+    }
+}
 ----------------------------------------
 
 ------------------------------------------------------------
@@ -1063,14 +1433,35 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.example.kipia.model.NodeType
+import com.example.kipia.utils.NameUtils
 
 @Composable
 fun AddNodeDialog(
+    tubeName: String = "",
     onDismiss: () -> Unit,
     onConfirm: (String, NodeType) -> Unit
 ) {
     var nodeName by remember { mutableStateOf("") }
     var selectedType by remember { mutableStateOf(NodeType.PRESSURE_WELL) }
+
+    // Получаем номер участка МН
+    val tubeNumber = NameUtils.getNodeNumberFromTube(tubeName)
+
+    // Автоматически определяем тип по названию участка МН
+    LaunchedEffect(tubeName) {
+        val (prefix, _) = NameUtils.getNodePrefixFromTube(tubeName)
+        selectedType = when (prefix) {
+            "ОД" -> NodeType.PRESSURE_WELL
+            "В" -> NodeType.VENT_WELL
+            "Задвижка" -> NodeType.VALVE
+            else -> NodeType.PRESSURE_WELL
+        }
+
+        // Автозаполнение номера
+        if (tubeNumber.isNotEmpty() && nodeName.isEmpty()) {
+            nodeName = "/1" // Начальный номер
+        }
+    }
 
     Dialog(onDismissRequest = onDismiss) {
         Card(
@@ -1083,7 +1474,7 @@ fun AddNodeDialog(
                 modifier = Modifier.padding(16.dp)
             ) {
                 Text(
-                    text = "Добавить объект", // Изменили название
+                    text = "Добавить объект",
                     style = MaterialTheme.typography.h6
                 )
 
@@ -1092,13 +1483,13 @@ fun AddNodeDialog(
                 // Выбор типа узла
                 Text("Тип объекта:")
                 LazyColumn(
-                    modifier = Modifier.height(160.dp) // Увеличили высоту для задвижки
+                    modifier = Modifier.height(160.dp)
                 ) {
                     items(NodeType.values()) { type ->
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .   clickable { selectedType = type }
+                                .clickable { selectedType = type }
                                 .padding(8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -1123,9 +1514,9 @@ fun AddNodeDialog(
                     label = {
                         Text(
                             when (selectedType) {
-                                NodeType.PRESSURE_WELL -> "Номер ОД (например: 937/1)"
-                                NodeType.VENT_WELL -> "Номер В (например: 937/1)"
-                                NodeType.VALVE -> "Номер задвижки (например: 937)"
+                                NodeType.PRESSURE_WELL -> "Номер ОД (например: /1)"
+                                NodeType.VENT_WELL -> "Номер В (например: /2)"
+                                NodeType.VALVE -> "Номер задвижки (например: 878)"
                                 NodeType.CUSTOM -> "Название объекта"
                             }
                         )
@@ -1150,7 +1541,7 @@ fun AddNodeDialog(
                     val fullName = when (selectedType) {
                         NodeType.CUSTOM -> nodeName
                         NodeType.VALVE -> "${selectedType.prefix} $nodeName"
-                        else -> "${selectedType.prefix} $nodeName"
+                        else -> "${selectedType.prefix} $tubeNumber$nodeName"
                     }
                     Text(
                         text = "Полное имя: $fullName",
@@ -1166,10 +1557,7 @@ fun AddNodeDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    Button(
-                        onClick = onDismiss,
-                        colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.error)
-                    ) {
+                    Button(onClick = onDismiss) {
                         Text("Отмена")
                     }
 
@@ -1178,7 +1566,13 @@ fun AddNodeDialog(
                     Button(
                         onClick = {
                             if (nodeName.isNotBlank()) {
-                                onConfirm(nodeName, selectedType)
+                                // Формируем полное имя для сохранения
+                                val fullNameToSave = when (selectedType) {
+                                    NodeType.CUSTOM -> nodeName
+                                    NodeType.VALVE -> "${selectedType.prefix} $nodeName"
+                                    else -> "${selectedType.prefix} $tubeNumber$nodeName"
+                                }
+                                onConfirm(fullNameToSave, selectedType)
                                 onDismiss()
                             }
                         },
@@ -1189,6 +1583,1140 @@ fun AddNodeDialog(
                 }
             }
         }
+    }
+}
+----------------------------------------
+
+------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\AddPKUDialog.kt ---
+------------------------------------------------------------
+
+package com.example.kipia.ui
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import com.example.kipia.utils.NameUtils
+
+@Composable
+fun AddPKUDialog(
+    kpName: String = "",
+    onDismiss: () -> Unit,
+    onConfirm: (String, String) -> Unit
+) {
+    var name by remember { mutableStateOf("") }
+    var description by remember { mutableStateOf("") }
+
+    // Автозаполнение при изменении kpName
+    LaunchedEffect(kpName) {
+        if (kpName.isNotEmpty() && name.isEmpty()) {
+            name = NameUtils.getPKUNameFromKP(kpName)
+        }
+    }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            elevation = 8.dp
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text("Добавить ПКУ", style = MaterialTheme.typography.h6)
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Название ПКУ") },
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text("Например: ПКУ 878 км") }
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedTextField(
+                    value = description,
+                    onValueChange = { description = it },
+                    label = { Text("Описание") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = false,
+                    maxLines = 3
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Button(onClick = onDismiss) {
+                        Text("Отмена")
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(
+                        onClick = {
+                            if (name.isNotBlank()) {
+                                onConfirm(name, description)
+                            }
+                        },
+                        enabled = name.isNotBlank()
+                    ) {
+                        Text("Добавить")
+                    }
+                }
+            }
+        }
+    }
+}
+----------------------------------------
+
+------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\AddSectionDialog.kt ---
+------------------------------------------------------------
+
+// app/src/main/java/com/example/kipia/ui/AddSectionDialog.kt
+package com.example.kipia.ui
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+
+@Composable
+fun AddSectionDialog(
+    pkuName: String = "",
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    var sectionName by remember { mutableStateOf("") }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            elevation = 8.dp
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text("Добавить секцию", style = MaterialTheme.typography.h6)
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedTextField(
+                    value = sectionName,
+                    onValueChange = { sectionName = it },
+                    label = { Text("Название секции") },
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text("Например: Секция 1") }
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Button(onClick = onDismiss) {
+                        Text("Отмена")
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(
+                        onClick = {
+                            if (sectionName.isNotBlank()) {
+                                onConfirm(sectionName)
+                            }
+                        },
+                        enabled = sectionName.isNotBlank()
+                    ) {
+                        Text("Добавить")
+                    }
+                }
+            }
+        }
+    }
+}
+----------------------------------------
+
+------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\AddSectionEquipmentDialog.kt ---
+------------------------------------------------------------
+
+package com.example.kipia.ui
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import com.example.kipia.model.EquipmentType
+
+@Composable
+fun AddSectionEquipmentDialog(
+    sectionName: String,
+    onDismiss: () -> Unit,
+    onConfirm: (EquipmentType) -> Unit
+) {
+    var selectedType by remember { mutableStateOf<EquipmentType?>(null) }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            elevation = 8.dp
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(
+                    text = "Добавить оборудование в $sectionName",
+                    style = MaterialTheme.typography.h6
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Выбор типа оборудования для секций
+                Text("Выберите тип оборудования:")
+                LazyColumn(
+                    modifier = Modifier.height(300.dp)
+                ) {
+                    // Оборудование для инженерного отсека
+                    if (sectionName.contains("Инженерный", ignoreCase = true)) {
+                        item {
+                            Text(
+                                text = "Инженерное оборудование:",
+                                style = MaterialTheme.typography.subtitle2,
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
+                        }
+                        items(listOf(
+                            EquipmentType.SHTM,
+                            EquipmentType.FIRE_ALARM,
+                            EquipmentType.SMOKE_DETECTOR,
+                            EquipmentType.MANUAL_DETECTOR,
+                            EquipmentType.SIREN,
+                            EquipmentType.AIR_CONDITIONER,
+                            EquipmentType.CONTROL_PANEL
+                        )) { type ->
+                            EquipmentTypeRow(
+                                type = type,
+                                isSelected = selectedType == type,
+                                onSelect = { selectedType = type }
+                            )
+                        }
+                    }
+
+                    // Оборудование для трансформаторного отсека
+                    if (sectionName.contains("Трансформаторный", ignoreCase = true)) {
+                        item {
+                            Text(
+                                text = "Трансформаторное оборудование:",
+                                style = MaterialTheme.typography.subtitle2,
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
+                        }
+                        items(listOf(
+                            EquipmentType.SMOKE_DETECTOR,
+                            EquipmentType.MANUAL_DETECTOR
+                        )) { type ->
+                            EquipmentTypeRow(
+                                type = type,
+                                isSelected = selectedType == type,
+                                onSelect = { selectedType = type }
+                            )
+                        }
+                    }
+
+                    // Общее оборудование для любых секций
+                    item {
+                        Text(
+                            text = "Общее оборудование:",
+                            style = MaterialTheme.typography.subtitle2,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                    }
+                    items(listOf(
+                        EquipmentType.FLOOD_DETECTOR,
+                        EquipmentType.OPENING_DETECTOR,
+                        EquipmentType.PRESSURE_GAUGE,
+                        EquipmentType.PRESSURE_TRANSDUCER
+                    )) { type ->
+                        EquipmentTypeRow(
+                            type = type,
+                            isSelected = selectedType == type,
+                            onSelect = { selectedType = type }
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Кнопки
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Button(onClick = onDismiss) {
+                        Text("Отмена")
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Button(
+                        onClick = {
+                            selectedType?.let { onConfirm(it) }
+                            onDismiss()
+                        },
+                        enabled = selectedType != null
+                    ) {
+                        Text("Добавить")
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun EquipmentTypeRow(
+    type: EquipmentType,
+    isSelected: Boolean,
+    onSelect: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onSelect() }
+            .padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        RadioButton(
+            selected = isSelected,
+            onClick = { onSelect() }
+        )
+        Text(
+            text = type.displayName,
+            modifier = Modifier.padding(start = 8.dp)
+        )
+    }
+}
+----------------------------------------
+
+------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\AddTubeDialog.kt ---
+------------------------------------------------------------
+
+package com.example.kipia.ui
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment.Companion.CenterVertically
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import com.example.kipia.utils.NameUtils
+
+@Composable
+fun AddTubeDialog(
+    kpName: String = "",
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    var selectedOption by remember { mutableStateOf("") }
+    var customName by remember { mutableStateOf("") }
+
+    val tubeOptions = remember(kpName) {
+        NameUtils.getTubeNameOptionsFromKP(kpName)
+    }
+
+    // Выбираем первый вариант по умолчанию
+    LaunchedEffect(tubeOptions) {
+        if (tubeOptions.isNotEmpty() && selectedOption.isEmpty()) {
+            selectedOption = tubeOptions.first()
+        }
+    }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            elevation = 8.dp
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text("Добавить участок МН", style = MaterialTheme.typography.h6)
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text("Выберите вариант:", style = MaterialTheme.typography.subtitle1)
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Список вариантов
+                LazyColumn(
+                    modifier = Modifier.height(120.dp)
+                ) {
+                    items(tubeOptions) { option ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { selectedOption = option }
+                                .padding(8.dp),
+                            verticalAlignment = CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = selectedOption == option,
+                                onClick = { selectedOption = option }
+                            )
+                            Text(
+                                text = option,
+                                modifier = Modifier.padding(start = 8.dp)
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Поле для своего варианта
+                OutlinedTextField(
+                    value = customName,
+                    onValueChange = {
+                        customName = it
+                        selectedOption = it
+                    },
+                    label = { Text("Свой вариант") },
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text("Введите свое название") }
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Button(onClick = onDismiss) {
+                        Text("Отмена")
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(
+                        onClick = {
+                            if (selectedOption.isNotBlank()) {
+                                onConfirm(selectedOption)
+                            }
+                        },
+                        enabled = selectedOption.isNotBlank()
+                    ) {
+                        Text("Добавить")
+                    }
+                }
+            }
+        }
+    }
+}
+----------------------------------------
+
+------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\AdvancedDragDropList.kt ---
+------------------------------------------------------------
+
+/*
+package com.example.kipia.ui
+
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.foundation.gestures.scrollBy
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
+import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun <T> AdvancedDragDropList(
+    items: List<T>,
+    onMove: (Int, Int) -> Unit,
+    modifier: Modifier = Modifier,
+    state: LazyListState = rememberLazyListState(),
+    content: @Composable (T, Boolean, Int) -> Unit
+) {
+    var draggedIndex by remember { mutableStateOf<Int?>(null) }
+    var dragOffset by remember { mutableStateOf(IntOffset.Zero) }
+    val coroutineScope = rememberCoroutineScope()
+
+    // Временный список для визуального отображения
+    val visualItems = remember { items.toMutableList() }
+
+    LaunchedEffect(items) {
+        if (draggedIndex == null) {
+            visualItems.clear()
+            visualItems.addAll(items)
+        }
+    }
+
+    LazyColumn(
+        modifier = modifier,
+        state = state
+    ) {
+        itemsIndexed(
+            items = visualItems,
+            key = { index, item ->
+                when (item) {
+                    is com.example.kipia.database.NodeEntity -> "node_${item.id}"
+                    else -> "item_${index}_${item.hashCode()}"
+                }
+            }
+        ) { index, item ->
+            val isDragged = index == draggedIndex
+
+            Box(
+                modifier = Modifier
+                    .pointerInput(index) {
+                        detectDragGesturesAfterLongPress(
+                            onDragStart = {
+                                draggedIndex = index
+                                dragOffset = IntOffset.Zero
+                                println("🎯 DRAG START: index=$index")
+                            },
+                            onDrag = { change, dragAmount ->
+                                change.consume()
+
+                                dragOffset = IntOffset(
+                                    dragOffset.x + dragAmount.x.roundToInt(),
+                                    dragOffset.y + dragAmount.y.roundToInt()
+                                )
+
+                                // Простой расчет новой позиции на основе смещения
+                                val dragDistance = dragOffset.y
+                                val itemHeight = 80 // примерная высота элемента в пикселях
+                                val positionsToMove = (dragDistance / itemHeight).toInt()
+
+                                val newIndex = (index + positionsToMove)
+                                    .coerceIn(0, items.size - 1)
+
+                                if (newIndex != draggedIndex) {
+                                    println("🔄 MOVING: $draggedIndex -> $newIndex (distance: $dragDistance)")
+
+                                    // Визуально перемещаем элемент
+                                    if (draggedIndex != null) {
+                                        val fromIndex = draggedIndex!!
+                                        val movedItem = visualItems.removeAt(fromIndex)
+                                        visualItems.add(newIndex, movedItem)
+                                        draggedIndex = newIndex
+
+                                        // Сохраняем в базу
+                                        coroutineScope.launch {
+                                            onMove(fromIndex, newIndex)
+                                        }
+                                    }
+                                }
+
+                                // Автопрокрутка
+                                val visibleItems = state.layoutInfo.visibleItemsInfo
+                                if (visibleItems.isNotEmpty() && draggedIndex != null) {
+                                    val firstVisible = visibleItems.first().index
+                                    val lastVisible = visibleItems.last().index
+                                    val currentIdx = draggedIndex!!
+
+                                    if (currentIdx <= firstVisible + 1 && dragAmount.y < 0) {
+                                        coroutineScope.launch {
+                                            state.scrollBy(-dragAmount.y / 2f)
+                                        }
+                                    } else if (currentIdx >= lastVisible - 1 && dragAmount.y > 0) {
+                                        coroutineScope.launch {
+                                            state.scrollBy(dragAmount.y / 2f)
+                                        }
+                                    }
+                                }
+                            },
+                            onDragEnd = {
+                                println("🏁 DRAG END: Final position ${draggedIndex ?: "unknown"}")
+                                draggedIndex = null
+                                dragOffset = IntOffset.Zero
+
+                                // Восстанавливаем оригинальный порядок для синхронизации
+                                visualItems.clear()
+                                visualItems.addAll(items)
+                            },
+                            onDragCancel = {
+                                println("❌ DRAG CANCEL")
+                                draggedIndex = null
+                                dragOffset = IntOffset.Zero
+                                visualItems.clear()
+                                visualItems.addAll(items)
+                            }
+                        )
+                    }
+                    .offset {
+                        if (isDragged) {
+                            IntOffset(dragOffset.x, dragOffset.y)
+                        } else {
+                            IntOffset.Zero
+                        }
+                    }
+                    .shadow(if (isDragged) 8.dp else 2.dp)
+                    .zIndex(if (isDragged) 1f else 0f)
+            ) {
+                content(item, isDragged, index)
+            }
+        }
+    }
+}
+*/
+
+----------------------------------------
+
+------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\ControlPointDetailScreen.kt ---
+------------------------------------------------------------
+
+package com.example.kipia.ui
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.kipia.database.AppDatabase
+import com.example.kipia.database.ControlPointEntity
+import com.example.kipia.database.PKUEntity
+import com.example.kipia.database.TubeEntity
+import com.example.kipia.database.SectionEntity
+import com.example.kipia.database.NodeEntity
+import kotlinx.coroutines.launch
+
+@Composable
+fun ControlPointDetailScreen(
+    controlPoint: ControlPointEntity,
+    pkuViewModel: PKUViewModel,
+    tubeViewModel: TubeViewModel,
+    nodeViewModel: NodeViewModel,
+    onBackClick: () -> Unit,
+    onAddPKU: (String, String) -> Unit,
+    onDeletePKU: (Long) -> Unit,
+    onAddTube: (String) -> Unit,
+    onDeleteTube: (Long) -> Unit,
+    onAddNode: (String, Long, com.example.kipia.model.NodeType) -> Unit,
+    onDeleteNode: (Long, Long) -> Unit
+) {
+    val context = LocalContext.current
+    val controlPointViewModel: ControlPointViewModel = viewModel(
+        factory = ControlPointViewModelFactory(AppDatabase.getInstance(context))
+    )
+
+    val sectionViewModel: SectionViewModel = viewModel(
+        factory = SectionViewModelFactory(AppDatabase.getInstance(context))
+    )
+
+    val pkus by pkuViewModel.pkus.collectAsState()
+    val tubes by tubeViewModel.tubes.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
+
+    var showAddPKUDialog by remember { mutableStateOf(false) }
+    var showAddTubeDialog by remember { mutableStateOf(false) }
+    var showEditControlPointDialog by remember { mutableStateOf(false) }
+
+    // Состояния для редактирования
+    var editingPKU by remember { mutableStateOf<PKUEntity?>(null) }
+    var editingTube by remember { mutableStateOf<TubeEntity?>(null) }
+    var editingNode by remember { mutableStateOf<NodeEntity?>(null) }
+    var selectedEquipmentForEditing by remember { mutableStateOf<Long?>(null) }
+
+    // Состояния для навигации
+    var selectedNodeForEquipment by remember { mutableStateOf<NodeEntity?>(null) }
+    var selectedSectionForEquipment by remember { mutableStateOf<SectionEntity?>(null) }
+    var selectedEquipmentForView by remember { mutableStateOf<Long?>(null) }
+    var selectedEquipmentForEdit by remember { mutableStateOf<Long?>(null) }
+
+    // Загружаем данные при изменении controlPoint
+    LaunchedEffect(controlPoint.id) {
+        pkuViewModel.loadPKUsByControlPointId(controlPoint.id)
+        tubeViewModel.loadTubesByControlPointId(controlPoint.id)
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(controlPoint.name) },
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Назад")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { showEditControlPointDialog = true }) {
+                        Icon(Icons.Default.Edit, contentDescription = "Редактировать КП")
+                    }
+                }
+            )
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            if (controlPoint.description.isNotEmpty()) {
+                Text(
+                    text = controlPoint.description,
+                    style = MaterialTheme.typography.body2,
+                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f),
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+
+            // Секция ПКУ с кнопкой добавления в одной строке
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("ПКУ", style = MaterialTheme.typography.h6)
+                Row {
+                    // Кнопка добавления ПКУ
+                    IconButton(
+                        onClick = { showAddPKUDialog = true },
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = "Добавить ПКУ")
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(2.dp))
+
+            // Список ПКУ с фиксированной высотой
+            if (pkus.isNotEmpty()) {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 150.dp)
+                ) {
+                    items(pkus) { pku ->
+                        PKUItem(
+                            pku = pku,
+                            sectionViewModel = sectionViewModel,
+                            onEdit = { editingPKU = pku },
+                            onDelete = { onDeletePKU(pku.id) },
+                            onAddSection = { sectionName, pkuId ->
+                                sectionViewModel.addSection(sectionName, pkuId)
+                            },
+                            onViewSectionEquipment = { sectionId ->
+                                // Находим реальную секцию по ID
+                                val sections = sectionViewModel.sections.value
+                                val section = sections.find { it.id == sectionId }
+                                selectedSectionForEquipment = section ?: SectionEntity(
+                                    id = sectionId,
+                                    name = "Отсек $sectionId",
+                                    pkuId = pku.id
+                                )
+                            }                        )
+                    }
+                }
+            } else {
+                Text(
+                    text = "Нет ПКУ",
+                    style = MaterialTheme.typography.caption,
+                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f),
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Секция Участков МН с кнопкой добавления в одной строке
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Участки МН", style = MaterialTheme.typography.h6)
+                IconButton(
+                    onClick = { showAddTubeDialog = true },
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Добавить участок МН")
+                }
+            }
+
+            Spacer(modifier = Modifier.height(2.dp))
+
+            // Список участков МН занимает оставшееся пространство
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                tubes.forEach { tube ->
+                    TubeItem(
+                        tube = tube,
+                        nodeViewModel = nodeViewModel,
+                        onEdit = { editingTube = tube },
+                        onDelete = {
+                            onDeleteTube(tube.id)
+                            coroutineScope.launch {
+                                tubeViewModel.loadTubesByControlPointId(controlPoint.id)
+                            }
+                        },
+                        onAddNode = { name, type ->
+                            onAddNode(name, tube.id, type)
+                            coroutineScope.launch {
+                                nodeViewModel.loadNodesByTubeId(tube.id)
+                            }
+                        },
+                        onDeleteNode = { nodeId ->
+                            onDeleteNode(nodeId, tube.id)
+                            coroutineScope.launch {
+                                nodeViewModel.loadNodesByTubeId(tube.id)
+                            }
+                        },
+                        onEditNode = { node -> editingNode = node },
+                        onViewEquipment = { node ->
+                            selectedNodeForEquipment = node
+                        }
+                    )                }
+            }
+        }
+    }
+
+    // Диалоги
+    if (showAddPKUDialog) {
+        AddPKUDialog(
+            kpName = controlPoint.name,
+            onDismiss = { showAddPKUDialog = false },
+            onConfirm = { name, description ->
+                onAddPKU(name, description)
+                showAddPKUDialog = false
+            }
+        )
+    }
+
+    if (showAddTubeDialog) {
+        AddTubeDialog(
+            kpName = controlPoint.name,
+            onDismiss = { showAddTubeDialog = false },
+            onConfirm = { name ->
+                onAddTube(name)
+                showAddTubeDialog = false
+            }
+        )
+    }
+
+    if (showEditControlPointDialog) {
+        EditNameDialog(
+            currentName = controlPoint.name,
+            currentDescription = controlPoint.description,
+            title = "Редактировать КП",
+            nameHint = "Название КП",
+            descriptionHint = "Описание КП",
+            onDismiss = { showEditControlPointDialog = false },
+            onConfirm = { newName, newDescription ->
+                controlPointViewModel.updateControlPoint(controlPoint.id, newName, newDescription)
+                showEditControlPointDialog = false
+            }
+        )
+    }
+
+    if (editingPKU != null) {
+        EditNameDialog(
+            currentName = editingPKU!!.name,
+            currentDescription = editingPKU!!.description,
+            title = "Редактировать ПКУ",
+            nameHint = "Название ПКУ",
+            descriptionHint = "Описание ПКУ",
+            onDismiss = { editingPKU = null },
+            onConfirm = { newName, newDescription ->
+                pkuViewModel.updatePKU(editingPKU!!.id, newName, newDescription)
+                editingPKU = null
+            }
+        )
+    }
+
+    if (editingTube != null) {
+        EditNameDialog(
+            currentName = editingTube!!.name,
+            currentDescription = "",
+            title = "Редактировать участок МН",
+            nameHint = "Название участка МН",
+            showDescription = false,
+            onDismiss = { editingTube = null },
+            onConfirm = { newName, _ ->
+                tubeViewModel.updateTube(editingTube!!.id, newName)
+                editingTube = null
+            }
+        )
+    }
+
+    if (editingNode != null) {
+        EditNameDialog(
+            currentName = editingNode!!.name,
+            currentDescription = "",
+            title = "Редактировать объект",
+            nameHint = "Название объекта",
+            showDescription = false,
+            onDismiss = { editingNode = null },
+            onConfirm = { newName, _ ->
+                nodeViewModel.updateNode(editingNode!!.id, newName, editingNode!!.tubeId)
+                editingNode = null
+            }
+        )
+    }
+
+    // 1. ЕСЛИ ВЫБРАН УЗЕЛ ДЛЯ ПРОСМОТРА ОБОРУДОВАНИЯ - ПОКАЗЫВАЕМ ЭКРАН ОБОРУДОВАНИЯ
+    if (selectedNodeForEquipment != null) {
+        EquipmentDetailScreen(
+            nodeName = selectedNodeForEquipment!!.name,
+            nodeId = selectedNodeForEquipment!!.id,
+            onBackClick = { selectedNodeForEquipment = null },
+            onViewEquipment = { equipmentId ->
+                selectedEquipmentForView = equipmentId
+                selectedNodeForEquipment = null
+            }
+        )
+        return
+    }
+
+    // 2. ЕСЛИ ВЫБРАНО ОБОРУДОВАНИЕ ДЛЯ ПРОСМОТРА - ПОКАЗЫВАЕМ ПРОСМОТР
+    if (selectedEquipmentForView != null) {
+        ViewEquipmentScreen(
+            equipmentId = selectedEquipmentForView!!,
+            onBackClick = {
+                selectedEquipmentForView = null
+                selectedNodeForEquipment = selectedNodeForEquipment
+            },
+            onEditClick = {
+                selectedEquipmentForEdit = selectedEquipmentForView
+                selectedEquipmentForView = null
+            }
+        )
+        return
+    }
+
+    // 3. ЕСЛИ ВЫБРАНО ОБОРУДОВАНИЕ ДЛЯ РЕДАКТИРОВАНИЯ - ПОКАЗЫВАЕМ РЕДАКТОР
+    if (selectedEquipmentForEdit != null) {
+        EditEquipmentScreen(
+            equipmentId = selectedEquipmentForEdit!!,
+            onBackClick = {
+                selectedEquipmentForView = selectedEquipmentForEdit
+                selectedEquipmentForEdit = null
+            },
+            onSaveClick = {
+                selectedEquipmentForView = selectedEquipmentForEdit
+                selectedEquipmentForEdit = null
+            }
+        )
+        return
+    }
+
+    // 4. ЕСЛИ ВЫБРАН ОТСЕК ДЛЯ ПРОСМОТРА ОБОРУДОВАНИЯ - ПОКАЗЫВАЕМ ЭКРАН ОБОРУДОВАНИЯ
+    if (selectedSectionForEquipment != null) {
+        EquipmentDetailScreen(
+            sectionName = selectedSectionForEquipment!!.name,
+            sectionId = selectedSectionForEquipment!!.id,
+            onBackClick = { selectedSectionForEquipment = null },
+            onViewEquipment = { equipmentId ->
+                selectedEquipmentForView = equipmentId
+                selectedSectionForEquipment = null
+            }
+        )
+        return
+    }
+
+    if (selectedEquipmentForEditing != null) {
+        EditEquipmentScreen(
+            equipmentId = selectedEquipmentForEditing!!,
+            onBackClick = { selectedEquipmentForEditing = null },
+            onSaveClick = { selectedEquipmentForEditing = null }
+        )
+        return
+    }
+}
+----------------------------------------
+
+------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\ControlPointListScreen.kt ---
+------------------------------------------------------------
+
+package com.example.kipia.ui
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.example.kipia.database.ControlPointEntity
+
+@Composable
+fun ControlPointListScreen(
+    controlPoints: List<ControlPointEntity>,
+    onControlPointClick: (ControlPointEntity) -> Unit,
+    onAddControlPoint: (String, String) -> Unit,
+    onDeleteControlPoint: (Long) -> Unit,
+    onEditControlPoint: (Long, String, String) -> Unit
+) {
+    var showAddDialog by remember { mutableStateOf(false) }
+    var showEditDialog by remember { mutableStateOf(false) }
+    var editingControlPoint by remember { mutableStateOf<ControlPointEntity?>(null) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        // Заголовок и кнопка добавления в одной строке
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = "Список КП", style = MaterialTheme.typography.h5)
+            IconButton(
+                onClick = { showAddDialog = true },
+                modifier = Modifier.size(48.dp)
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Добавить КП")
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        LazyColumn(modifier = Modifier.weight(1f)) {
+            items(controlPoints) { cp ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    elevation = 4.dp
+                ) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Название КП - клик для перехода к деталям
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clickable { onControlPointClick(cp) }
+                        ) {
+                            Text(text = cp.name, style = MaterialTheme.typography.body1)
+                            if (cp.description.isNotEmpty()) {
+                                Text(
+                                    text = cp.description,
+                                    style = MaterialTheme.typography.body2,
+                                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
+                                )
+                            }
+                        }
+
+                        // Кнопка редактирования
+                        IconButton(
+                            onClick = {
+                                editingControlPoint = cp
+                                showEditDialog = true
+                            }
+                        ) {
+                            Icon(Icons.Default.Edit, contentDescription = "Редактировать КП")
+                        }
+
+                        // Кнопка удаления
+                        IconButton(onClick = { onDeleteControlPoint(cp.id) }) {
+                            Icon(Icons.Default.Delete, contentDescription = "Удалить КП")
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Диалог добавления КП
+    if (showAddDialog) {
+        EditNameDialog(
+            currentName = "",
+            currentDescription = "",
+            title = "Добавить КП",
+            nameHint = "Название КП",
+            descriptionHint = "Описание КП",
+            onDismiss = { showAddDialog = false },
+            onConfirm = { name, description ->
+                onAddControlPoint(name, description)
+                showAddDialog = false
+            }
+        )
+    }
+
+    // Диалог редактирования КП
+    if (showEditDialog && editingControlPoint != null) {
+        EditNameDialog(
+            currentName = editingControlPoint!!.name,
+            currentDescription = editingControlPoint!!.description,
+            title = "Редактировать КП",
+            nameHint = "Название КП",
+            descriptionHint = "Описание КП",
+            onDismiss = {
+                showEditDialog = false
+                editingControlPoint = null
+            },
+            onConfirm = { newName, newDescription ->
+                editingControlPoint?.let { cp ->
+                    onEditControlPoint(cp.id, newName, newDescription)
+                }
+                showEditDialog = false
+                editingControlPoint = null
+            }
+        )
     }
 }
 ----------------------------------------
@@ -1254,6 +2782,8 @@ class ControlPointViewModel(private val database: AppDatabase) : ViewModel() {
             loadControlPoints()
         }
     }
+
+
 }
 ----------------------------------------
 
@@ -1279,6 +2809,446 @@ class ControlPointViewModelFactory(private val database: AppDatabase) : ViewMode
 ----------------------------------------
 
 ------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\DraggableNodeItem.kt ---
+------------------------------------------------------------
+
+package com.example.kipia.ui
+
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.Card
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun DraggableNodeItem(
+    node: com.example.kipia.database.NodeEntity,
+    isDragging: Boolean,
+    displayIndex: Int,
+    onEdit: (com.example.kipia.database.NodeEntity) -> Unit,
+    onDelete: () -> Unit
+) {
+    // Плавные анимации
+    val elevation by animateDpAsState(targetValue = if (isDragging) 16.dp else 4.dp)
+    val backgroundColor by animateColorAsState(
+        targetValue = if (isDragging) Color(0xFFE8F5E8) else Color.White
+    )
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth(),
+        elevation = elevation,
+        backgroundColor = backgroundColor
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Иконка для перетаскивания
+            Icon(
+                imageVector = Icons.Default.Menu,
+                contentDescription = "Перетащить",
+                modifier = Modifier
+                    .size(24.dp)
+                    .padding(end = 12.dp),
+                tint = if (isDragging) Color(0xFF4CAF50) else Color.Gray
+            )
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = node.name,
+                    style = androidx.compose.material.MaterialTheme.typography.body1,
+                    color = if (isDragging) Color(0xFF2E7D32) else Color.Black
+                )
+                Text(
+                    text = "Позиция: ${displayIndex + 1}",
+                    style = androidx.compose.material.MaterialTheme.typography.caption,
+                    color = if (isDragging) Color(0xFF2E7D32) else Color.Gray
+                )
+            }
+
+            // Кнопки редактирования и удаления
+            if (!isDragging) {
+                IconButton(
+                    onClick = { onEdit(node) },
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(Icons.Default.Edit, contentDescription = "Редактировать")
+                }
+
+                IconButton(
+                    onClick = onDelete,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(Icons.Default.Delete, contentDescription = "Удалить")
+                }
+            }
+        }
+    }
+}
+----------------------------------------
+
+------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\EditEquipmentScreen.kt ---
+------------------------------------------------------------
+
+// app/src/main/java/com/example/kipia/ui/EditEquipmentScreen.kt
+package com.example.kipia.ui
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.kipia.database.AppDatabase
+import com.example.kipia.database.DetailedEquipmentEntity
+import com.example.kipia.model.EquipmentType
+
+@Composable
+fun EditEquipmentScreen(
+    equipmentId: Long,
+    onBackClick: () -> Unit,
+    onSaveClick: () -> Unit
+) {
+    val context = LocalContext.current
+    val equipmentViewModel: EquipmentViewModel = viewModel(
+        factory = EquipmentViewModelFactory(AppDatabase.getInstance(context))
+    )
+
+    var currentEquipment by remember { mutableStateOf<DetailedEquipmentEntity?>(null) }
+
+    // Загружаем оборудование при открытии
+    LaunchedEffect(equipmentId) {
+        val equipment = equipmentViewModel.getEquipmentById(equipmentId)
+        currentEquipment = equipment
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Редактирование оборудования") },
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Назад")
+                    }
+                },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            currentEquipment?.let {
+                                equipmentViewModel.updateEquipment(it)
+                                onSaveClick()
+                            }
+                        },
+                        enabled = currentEquipment != null
+                    ) {
+                        Icon(Icons.Default.Check, contentDescription = "Сохранить")
+                    }
+                }
+            )
+        }
+    ) { innerPadding ->
+        currentEquipment?.let { equipment ->
+            EquipmentForm(
+                equipment = equipment,
+                onEquipmentUpdate = { updatedEquipment ->
+                    currentEquipment = updatedEquipment
+                },
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp)
+            )
+        } ?: run {
+            // Показываем загрузку, если оборудование еще не загружено
+            Box(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+    }
+}
+
+@Composable
+fun EquipmentForm(
+    equipment: DetailedEquipmentEntity,
+    onEquipmentUpdate: (DetailedEquipmentEntity) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier) {
+        // Основная информация
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            elevation = 4.dp
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = "Основная информация",
+                    style = MaterialTheme.typography.h6,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                // Название оборудования
+                OutlinedTextField(
+                    value = equipment.name,
+                    onValueChange = { newName ->
+                        onEquipmentUpdate(equipment.copy(name = newName))
+                    },
+                    label = { Text("Название оборудования") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Тип оборудования (только для чтения)
+                OutlinedTextField(
+                    value = EquipmentType.valueOf(equipment.equipmentType).displayName,
+                    onValueChange = { },
+                    label = { Text("Тип оборудования") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    readOnly = true
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Общие характеристики
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            elevation = 4.dp
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = "Общие характеристики",
+                    style = MaterialTheme.typography.h6,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                OutlinedTextField(
+                    value = equipment.model,
+                    onValueChange = { newModel ->
+                        onEquipmentUpdate(equipment.copy(model = newModel))
+                    },
+                    label = { Text("Модель") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedTextField(
+                    value = equipment.manufacturer,
+                    onValueChange = { newManufacturer ->
+                        onEquipmentUpdate(equipment.copy(manufacturer = newManufacturer))
+                    },
+                    label = { Text("Производитель") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedTextField(
+                    value = equipment.serialNumber,
+                    onValueChange = { newSerial ->
+                        onEquipmentUpdate(equipment.copy(serialNumber = newSerial))
+                    },
+                    label = { Text("Заводской номер") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedTextField(
+                    value = equipment.productionYear,
+                    onValueChange = { newYear ->
+                        onEquipmentUpdate(equipment.copy(productionYear = newYear))
+                    },
+                    label = { Text("Год выпуска") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedTextField(
+                    value = equipment.verificationYear,
+                    onValueChange = { newVerification ->
+                        onEquipmentUpdate(equipment.copy(verificationYear = newVerification))
+                    },
+                    label = { Text("Год поверки") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+// В функции EquipmentForm в EditEquipmentScreen.kt обновляем блок специфических характеристик:
+
+// Специфические характеристики
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            elevation = 4.dp
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = "Специфические характеристики",
+                    style = MaterialTheme.typography.h6,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                OutlinedTextField(
+                    value = equipment.nominal,
+                    onValueChange = { newNominal ->
+                        onEquipmentUpdate(equipment.copy(nominal = newNominal))
+                    },
+                    label = { Text("Номинал") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedTextField(
+                    value = equipment.pressureLimit,
+                    onValueChange = { newPressure ->
+                        onEquipmentUpdate(equipment.copy(pressureLimit = newPressure))
+                    },
+                    label = { Text("Граница давления") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedTextField(
+                    value = equipment.softwareVersion,
+                    onValueChange = { newSoftware ->
+                        onEquipmentUpdate(equipment.copy(softwareVersion = newSoftware))
+                    },
+                    label = { Text("Версия ПО") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                // Дополнительные характеристики для БУР, БКЭП и других релейных защит
+                if (equipment.equipmentType in listOf("BUR", "BKEP", "DPS", "BKP", "UZR")) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = equipment.mo,
+                        onValueChange = { newMo ->
+                            onEquipmentUpdate(equipment.copy(mo = newMo))
+                        },
+                        label = { Text("МО") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+                    OutlinedTextField(
+                        value = equipment.mz,
+                        onValueChange = { newMz ->
+                            onEquipmentUpdate(equipment.copy(mz = newMz))
+                        },
+                        label = { Text("МЗ") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+                    OutlinedTextField(
+                        value = equipment.mto,
+                        onValueChange = { newMto ->
+                            onEquipmentUpdate(equipment.copy(mto = newMto))
+                        },
+                        label = { Text("МТО") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+                    OutlinedTextField(
+                        value = equipment.mtz,
+                        onValueChange = { newMtz ->
+                            onEquipmentUpdate(equipment.copy(mtz = newMtz))
+                        },
+                        label = { Text("МТЗ") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+                    OutlinedTextField(
+                        value = equipment.muo,
+                        onValueChange = { newMuo ->
+                            onEquipmentUpdate(equipment.copy(muo = newMuo))
+                        },
+                        label = { Text("МУО") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+                    OutlinedTextField(
+                        value = equipment.muz,
+                        onValueChange = { newMuz ->
+                            onEquipmentUpdate(equipment.copy(muz = newMuz))
+                        },
+                        label = { Text("МУЗ") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+                    OutlinedTextField(
+                        value = equipment.outputContacts,
+                        onValueChange = { newContacts ->
+                            onEquipmentUpdate(equipment.copy(outputContacts = newContacts))
+                        },
+                        label = { Text("Кол.об.вых.зв") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                }
+            }
+        }
+    }
+}
+----------------------------------------
+
+------------------------------------------------------------
 --- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\EditNameDialog.kt ---
 ------------------------------------------------------------
 
@@ -1295,12 +3265,16 @@ import androidx.compose.ui.window.Dialog
 @Composable
 fun EditNameDialog(
     currentName: String,
+    currentDescription: String = "",
     title: String,
-    hint: String = "Введите название",
+    nameHint: String = "Введите название",
+    descriptionHint: String = "Введите описание",
+    showDescription: Boolean = true,
     onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit
+    onConfirm: (String, String) -> Unit
 ) {
     var newName by remember { mutableStateOf(currentName) }
+    var newDescription by remember { mutableStateOf(currentDescription) }
 
     Dialog(onDismissRequest = onDismiss) {
         Card(
@@ -1319,26 +3293,35 @@ fun EditNameDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Поле для редактирования названия
+                // Поле для названия
                 OutlinedTextField(
                     value = newName,
                     onValueChange = { newName = it },
-                    label = { Text(hint) },
-                    modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text(hint) }
+                    label = { Text(nameHint) },
+                    modifier = Modifier.fillMaxWidth()
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Поле для описания (если нужно)
+                if (showDescription) {
+                    OutlinedTextField(
+                        value = newDescription,
+                        onValueChange = { newDescription = it },
+                        label = { Text(descriptionHint) },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = false,
+                        maxLines = 3
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
 
                 // Кнопки
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    Button(
-                        onClick = onDismiss,
-                        colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.error)
-                    ) {
+                    Button(onClick = onDismiss) {
                         Text("Отмена")
                     }
 
@@ -1347,8 +3330,7 @@ fun EditNameDialog(
                     Button(
                         onClick = {
                             if (newName.isNotBlank()) {
-                                onConfirm(newName)
-                                onDismiss()
+                                onConfirm(newName, newDescription)
                             }
                         },
                         enabled = newName.isNotBlank()
@@ -1363,9 +3345,555 @@ fun EditNameDialog(
 ----------------------------------------
 
 ------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\EquipmentDetailScreen.kt ---
+------------------------------------------------------------
+
+// app/src/main/java/com/example/kipia/ui/EquipmentDetailScreen.kt
+package com.example.kipia.ui
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.kipia.database.AppDatabase
+import com.example.kipia.model.EquipmentType
+
+@Composable
+fun EquipmentDetailScreen(
+    nodeName: String? = null,
+    sectionName: String? = null,
+    nodeId: Long? = null,
+    sectionId: Long? = null,
+    onBackClick: () -> Unit,
+    onViewEquipment: (Long) -> Unit = {} // Изменяем на просмотр
+) {
+    val context = LocalContext.current
+    val equipmentViewModel: EquipmentViewModel = viewModel(
+        factory = EquipmentViewModelFactory(AppDatabase.getInstance(context))
+    )
+
+    val equipment by equipmentViewModel.equipment.collectAsState()
+
+    var showAddEquipmentDialog by remember { mutableStateOf(false) }
+    var showAddSectionEquipmentDialog by remember { mutableStateOf(false) }
+
+    // Загружаем оборудование при открытии экрана
+    LaunchedEffect(nodeId, sectionId) {
+        when {
+            nodeId != null -> equipmentViewModel.loadEquipmentByNodeId(nodeId)
+            sectionId != null -> equipmentViewModel.loadEquipmentBySectionId(sectionId)
+        }
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = nodeName ?: sectionName ?: "Оборудование",
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Назад")
+                    }
+                }
+            )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    if (sectionId != null) {
+                        showAddSectionEquipmentDialog = true
+                    } else {
+                        showAddEquipmentDialog = true
+                    }
+                }
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Добавить оборудование")
+            }
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            if (equipment.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Оборудование не добавлено",
+                        style = MaterialTheme.typography.body1,
+                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                    )
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(equipment) { item ->
+                        EquipmentItemCard(
+                            equipment = item,
+                            onView = { onViewEquipment(item.id) }, // Просмотр при нажатии на плашку
+                            onDelete = { equipmentViewModel.deleteEquipment(item) }
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    if (showAddEquipmentDialog) {
+        AddEquipmentDialog(
+            nodeId = nodeId,
+            sectionId = sectionId,
+            onDismiss = { showAddEquipmentDialog = false },
+            onConfirm = { type ->
+                // Создаем новое оборудование с названием по типу
+                val newEquipment = com.example.kipia.database.DetailedEquipmentEntity(
+                    equipmentType = type.name,
+                    name = type.displayName, // Используем displayName как название
+                    nodeId = nodeId,
+                    sectionId = sectionId
+                )
+                equipmentViewModel.addEquipment(newEquipment)
+            }
+        )
+    }
+
+    if (showAddSectionEquipmentDialog) {
+        AddSectionEquipmentDialog(
+            sectionName = sectionName ?: "секцию",
+            onDismiss = { showAddSectionEquipmentDialog = false },
+            onConfirm = { type ->
+                val newEquipment = com.example.kipia.database.DetailedEquipmentEntity(
+                    equipmentType = type.name,
+                    name = type.displayName,
+                    sectionId = sectionId
+                )
+                equipmentViewModel.addEquipment(newEquipment)
+            }
+        )
+    }
+}
+
+@Composable
+fun EquipmentItemCard(
+    equipment: com.example.kipia.database.DetailedEquipmentEntity,
+    onView: () -> Unit, // Только просмотр
+    onDelete: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+            .clickable { onView() }, // Открываем просмотр при нажатии
+        elevation = 2.dp
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp)
+        ) {
+            Text(
+                text = equipment.name,
+                style = MaterialTheme.typography.h6
+            )
+
+            if (equipment.model.isNotEmpty()) {
+                Text(
+                    text = "Модель: ${equipment.model}",
+                    style = MaterialTheme.typography.body2
+                )
+            }
+            if (equipment.serialNumber.isNotEmpty()) {
+                Text(
+                    text = "Заводской номер: ${equipment.serialNumber}",
+                    style = MaterialTheme.typography.body2
+                )
+            }
+
+            // Только кнопка удаления
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                TextButton(onClick = onDelete) {
+                    Text("Удалить", color = MaterialTheme.colors.error)
+                }
+            }
+        }
+    }
+}
+----------------------------------------
+
+------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\EquipmentViewModel.kt ---
+------------------------------------------------------------
+
+// app/src/main/java/com/example/kipia/ui/EquipmentViewModel.kt
+package com.example.kipia.ui
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.kipia.database.AppDatabase
+import com.example.kipia.database.DetailedEquipmentEntity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+class EquipmentViewModel(private val database: AppDatabase) : ViewModel() {
+
+    private val _equipment = MutableStateFlow<List<DetailedEquipmentEntity>>(emptyList())
+    val equipment: StateFlow<List<DetailedEquipmentEntity>> = _equipment
+
+    private val _currentNodeId = MutableStateFlow<Long?>(null)
+    private val _currentSectionId = MutableStateFlow<Long?>(null)
+
+    fun loadEquipmentByNodeId(nodeId: Long) {
+        _currentNodeId.value = nodeId
+        _currentSectionId.value = null
+
+        viewModelScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                database.detailedEquipmentDao().getEquipmentByNodeId(nodeId)
+            }
+            _equipment.value = result
+        }
+    }
+
+    fun loadEquipmentBySectionId(sectionId: Long) {
+        _currentSectionId.value = sectionId
+        _currentNodeId.value = null
+
+        viewModelScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                database.detailedEquipmentDao().getEquipmentBySectionId(sectionId)
+            }
+            _equipment.value = result
+        }
+    }
+
+    fun addEquipment(equipment: DetailedEquipmentEntity) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                database.detailedEquipmentDao().insert(equipment)
+            }
+            // Обновляем список после добавления
+            _currentNodeId.value?.let { loadEquipmentByNodeId(it) }
+            _currentSectionId.value?.let { loadEquipmentBySectionId(it) }
+        }
+    }
+
+    fun updateEquipment(equipment: DetailedEquipmentEntity) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                database.detailedEquipmentDao().update(equipment)
+            }
+            // Обновляем список после изменения
+            _currentNodeId.value?.let { loadEquipmentByNodeId(it) }
+            _currentSectionId.value?.let { loadEquipmentBySectionId(it) }
+        }
+    }
+
+    fun deleteEquipment(equipment: DetailedEquipmentEntity) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                database.detailedEquipmentDao().delete(equipment)
+            }
+            // Обновляем список после удаления
+            _currentNodeId.value?.let { loadEquipmentByNodeId(it) }
+            _currentSectionId.value?.let { loadEquipmentBySectionId(it) }
+        }
+    }
+
+    suspend fun getEquipmentById(equipmentId: Long): DetailedEquipmentEntity? {
+        return withContext(Dispatchers.IO) {
+            database.detailedEquipmentDao().getEquipmentById(equipmentId)
+        }
+    }
+
+}
+----------------------------------------
+
+------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\EquipmentViewModelFactory.kt ---
+------------------------------------------------------------
+
+package com.example.kipia.ui
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import com.example.kipia.database.AppDatabase
+
+class EquipmentViewModelFactory(private val database: AppDatabase) : ViewModelProvider.Factory {
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(EquipmentViewModel::class.java)) {
+            return EquipmentViewModel(database) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
+----------------------------------------
+
+------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\EventViewModel.kt ---
+------------------------------------------------------------
+
+// app/src/main/java/com/example/kipia/ui/EventViewModel.kt
+package com.example.kipia.ui
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.kipia.database.AppDatabase
+import com.example.kipia.database.EventEntity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+class EventViewModel(private val database: AppDatabase) : ViewModel() {
+
+    private val _events = MutableStateFlow<List<EventEntity>>(emptyList())
+    val events: StateFlow<List<EventEntity>> = _events
+
+    private var _currentControlPointId: Long = 0L
+
+    fun loadEventsByControlPointId(controlPointId: Long) {
+        _currentControlPointId = controlPointId
+        viewModelScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                database.eventDao().getEventsByControlPointId(controlPointId)
+            }
+            _events.value = result
+        }
+    }
+
+    fun addEvent(event: EventEntity) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                database.eventDao().insert(event)
+            }
+            loadEventsByControlPointId(_currentControlPointId)
+        }
+    }
+
+    fun updateEvent(event: EventEntity) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                database.eventDao().update(event)
+            }
+            loadEventsByControlPointId(_currentControlPointId)
+        }
+    }
+
+    fun deleteEvent(event: EventEntity) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                database.eventDao().delete(event)
+            }
+            loadEventsByControlPointId(_currentControlPointId)
+        }
+    }
+}
+----------------------------------------
+
+------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\EventViewModelFactory.kt ---
+------------------------------------------------------------
+
+// app/src/main/java/com/example/kipia/ui/EventViewModelFactory.kt
+package com.example.kipia.ui
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import com.example.kipia.database.AppDatabase
+
+class EventViewModelFactory(private val database: AppDatabase) : ViewModelProvider.Factory {
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(EventViewModel::class.java)) {
+            return EventViewModel(database) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
+----------------------------------------
+
+------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\NodeItem.kt ---
+------------------------------------------------------------
+
+package com.example.kipia.ui
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.Card
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun NodeItem(
+    node: com.example.kipia.database.NodeEntity,
+    onEdit: (com.example.kipia.database.NodeEntity) -> Unit,
+    onDelete: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 12.dp, top = 2.dp, bottom = 2.dp),
+        elevation = 1.dp,
+        backgroundColor = MaterialTheme.colors.surface // Используем цвет поверхности темы
+    ) {
+        Row(
+            modifier = Modifier.padding(6.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = node.name,
+                style = MaterialTheme.typography.body2,
+                modifier = Modifier.weight(1f),
+                color = MaterialTheme.colors.onSurface // Используем цвет текста темы
+            )
+            IconButton(
+                onClick = { onEdit(node) },
+                modifier = Modifier.size(20.dp)
+            ) {
+                Icon(
+                    Icons.Default.Edit,
+                    contentDescription = "Редактировать объект",
+                    modifier = Modifier.size(14.dp),
+                    tint = MaterialTheme.colors.onSurface // Цвет иконки по теме
+                )
+            }
+            IconButton(
+                onClick = onDelete,
+                modifier = Modifier.size(20.dp)
+            ) {
+                Icon(
+                    Icons.Default.Delete,
+                    contentDescription = "Удалить объект",
+                    modifier = Modifier.size(14.dp),
+                    tint = MaterialTheme.colors.onSurface // Цвет иконки по теме
+                )
+            }
+        }
+    }
+}
+----------------------------------------
+
+------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\NodeItemWithEquipment.kt ---
+------------------------------------------------------------
+
+// app/src/main/java/com/example/kipia/ui/NodeItemWithEquipment.kt
+package com.example.kipia.ui
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.Card
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun NodeItemWithEquipment(
+    node: com.example.kipia.database.NodeEntity,
+    onEdit: (com.example.kipia.database.NodeEntity) -> Unit,
+    onDelete: () -> Unit,
+    onViewEquipment: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 12.dp, top = 2.dp, bottom = 2.dp)
+            .clickable { onViewEquipment() }, // Весь элемент кликабелен для просмотра оборудования
+        elevation = 1.dp,
+        backgroundColor = MaterialTheme.colors.surface
+    ) {
+        Row(
+            modifier = Modifier.padding(6.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = node.name,
+                style = MaterialTheme.typography.body2,
+                modifier = Modifier.weight(1f),
+                color = MaterialTheme.colors.onSurface
+            )
+
+            // Убрали шестеренку - оставили только редактирование и удаление
+
+            // Кнопка редактирования объекта
+            IconButton(
+                onClick = { onEdit(node) },
+                modifier = Modifier.size(20.dp)
+            ) {
+                Icon(
+                    Icons.Default.Edit,
+                    contentDescription = "Редактировать объект",
+                    modifier = Modifier.size(14.dp),
+                    tint = MaterialTheme.colors.onSurface
+                )
+            }
+
+            // Кнопка удаления объекта
+            IconButton(
+                onClick = onDelete,
+                modifier = Modifier.size(20.dp)
+            ) {
+                Icon(
+                    Icons.Default.Delete,
+                    contentDescription = "Удалить объект",
+                    modifier = Modifier.size(14.dp),
+                    tint = MaterialTheme.colors.onSurface
+                )
+            }
+        }
+    }
+}
+----------------------------------------
+
+------------------------------------------------------------
 --- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\NodeViewModel.kt ---
 ------------------------------------------------------------
 
+// app/src/main/java/com/example/kipia/ui/NodeViewModel.kt
 package com.example.kipia.ui
 
 import androidx.lifecycle.ViewModel
@@ -1374,6 +3902,7 @@ import com.example.kipia.database.AppDatabase
 import com.example.kipia.database.NodeEntity
 import com.example.kipia.model.NodeType
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -1381,40 +3910,59 @@ import kotlinx.coroutines.withContext
 
 class NodeViewModel(private val database: AppDatabase) : ViewModel() {
 
-    private val _nodes: MutableStateFlow<List<NodeEntity>> = MutableStateFlow(emptyList())
-    val nodes: StateFlow<List<NodeEntity>> = _nodes
+    // Основной поток для текущего отображения
+    private val _currentNodes = MutableStateFlow<List<NodeEntity>>(emptyList())
+    val nodes: StateFlow<List<NodeEntity>> = _currentNodes
 
+    // Отдельные потоки для каждой трубы
+    private val _nodesByTubeId = mutableMapOf<Long, MutableStateFlow<List<NodeEntity>>>()
+
+    // Получить Flow для конкретной трубы
+    fun getNodesFlowForTube(tubeId: Long): StateFlow<List<NodeEntity>> {
+        if (!_nodesByTubeId.containsKey(tubeId)) {
+            _nodesByTubeId[tubeId] = MutableStateFlow(emptyList())
+        }
+        return _nodesByTubeId[tubeId]!!
+    }
+
+    // Загрузка узлов для конкретной трубы
     fun loadNodesByTubeId(tubeId: Long) {
         viewModelScope.launch {
             val result = withContext(Dispatchers.IO) {
                 database.nodeDao().getNodesByTubeId(tubeId)
             }
             println("DEBUG: Loaded nodes for tube $tubeId: $result")
-            _nodes.value = result
+
+            // Обновляем хранилище для этой трубы
+            if (!_nodesByTubeId.containsKey(tubeId)) {
+                _nodesByTubeId[tubeId] = MutableStateFlow(emptyList())
+            }
+            _nodesByTubeId[tubeId]?.value = result
+
+            // Устанавливаем текущие узлы для отображения
+            _currentNodes.value = result
         }
     }
 
-    fun addNode(name: String, tubeId: Long, nodeType: NodeType) {
-        println("DEBUG: addNode called with name=$name, tubeId=$tubeId, type=$nodeType")
+    fun addNode(fullName: String, tubeId: Long, nodeType: NodeType) {
         viewModelScope.launch {
-            // Формируем полное имя в зависимости от типа
-            val fullName = when (nodeType) {
-                NodeType.CUSTOM -> name
-                else -> "${nodeType.prefix} $name"
+            // Получаем текущие узлы для определения orderIndex
+            val currentNodes = withContext(Dispatchers.IO) {
+                database.nodeDao().getNodesByTubeId(tubeId)
             }
+            val nextOrderIndex = currentNodes.size
 
             val node = NodeEntity(
                 name = fullName,
                 tubeId = tubeId,
-                nodeType = nodeType.name // Сохраняем как строку
+                nodeType = nodeType.name,
+                orderIndex = nextOrderIndex
             )
-            println("DEBUG: About to insert node=$node")
+
             withContext(Dispatchers.IO) {
                 database.nodeDao().insert(node)
             }
-            println("DEBUG: Node inserted, now loading nodes")
             loadNodesByTubeId(tubeId)
-            println("DEBUG: Nodes loaded")
         }
     }
 
@@ -1423,26 +3971,135 @@ class NodeViewModel(private val database: AppDatabase) : ViewModel() {
             withContext(Dispatchers.IO) {
                 database.nodeDao().deleteById(id)
             }
-            println("DEBUG: Node deleted, now loading nodes")
-            loadNodesByTubeId(tubeId)
-            println("DEBUG: Nodes loaded")
+            // После удаления пересчитываем порядок
+            reorderNodesAfterDeletion(tubeId)
         }
     }
 
-    fun updateNode(id: Long, newName: String) {
+    fun updateNode(id: Long, newName: String, tubeId: Long) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 database.nodeDao().update(id, newName)
             }
-            // Обновляем список узлов для текущей трубы
-            val current = withContext(Dispatchers.IO) {
-                database.nodeDao().getNodeById(id)
+            loadNodesByTubeId(tubeId)
+        }
+    }
+
+    // Функция для обновления порядка узлов
+    fun updateNodesOrder(tubeId: Long, newOrder: List<NodeEntity>) {
+        viewModelScope.launch {
+            val updatedNodes = newOrder.mapIndexed { index, node ->
+                node.copy(orderIndex = index)
             }
-            current?.let { node ->
-                loadNodesByTubeId(node.tubeId)
+
+            withContext(Dispatchers.IO) {
+                updatedNodes.forEach { node ->
+                    database.nodeDao().updateOrder(node.id, node.orderIndex)
+                }
+            }
+
+            loadNodesByTubeId(tubeId)
+        }
+    }
+
+    // Пересчет порядка после удаления
+    private suspend fun reorderNodesAfterDeletion(tubeId: Long) {
+        val remainingNodes = withContext(Dispatchers.IO) {
+            database.nodeDao().getNodesByTubeId(tubeId)
+        }
+
+        val reorderedNodes = remainingNodes.sortedBy { it.orderIndex }.mapIndexed { index, node ->
+            node.copy(orderIndex = index)
+        }
+
+        withContext(Dispatchers.IO) {
+            reorderedNodes.forEach { node ->
+                database.nodeDao().updateOrder(node.id, node.orderIndex)
             }
         }
-    }}
+
+        loadNodesByTubeId(tubeId)
+    }
+
+    // Добавьте этот метод в класс NodeViewModel
+// В NodeViewModel, в методе moveNode добавьте логирование:
+// В NodeViewModel
+    fun moveNode(tubeId: Long, fromIndex: Int, toIndex: Int) {
+        viewModelScope.launch {
+            try {
+                val nodes = withContext(Dispatchers.IO) {
+                    database.nodeDao().getNodesByTubeId(tubeId)
+                }.sortedBy { it.orderIndex }
+
+                if (fromIndex in nodes.indices && toIndex in nodes.indices) {
+                    val updatedNodes = nodes.toMutableList()
+                    val movedNode = updatedNodes.removeAt(fromIndex)
+                    updatedNodes.add(toIndex, movedNode)
+
+                    // Обновляем порядковые номера
+                    val reorderedNodes = updatedNodes.mapIndexed { index, node ->
+                        node.copy(orderIndex = index)
+                    }
+
+                    // Сохраняем в базу
+                    withContext(Dispatchers.IO) {
+                        reorderedNodes.forEach { node ->
+                            database.nodeDao().updateOrder(node.id, node.orderIndex)
+                        }
+                    }
+
+                    // Немедленно обновляем UI
+                    loadNodesByTubeId(tubeId)
+                }
+            } catch (e: Exception) {
+                // Обработка ошибок
+                e.printStackTrace()
+            }
+        }
+    }
+
+    // В NodeViewModel
+    fun reorderNodes(tubeId: Long, fromIndex: Int, toIndex: Int) {
+        viewModelScope.launch {
+            println("🔄 REORDER: Moving from $fromIndex to $toIndex in tube $tubeId")
+
+            try {
+                // Получаем текущие узлы
+                val nodes = withContext(Dispatchers.IO) {
+                    database.nodeDao().getNodesByTubeId(tubeId)
+                }.sortedBy { it.orderIndex }
+
+                println("📊 BEFORE: ${nodes.map { it.name }}")
+
+                if (fromIndex in nodes.indices && toIndex in nodes.indices) {
+                    // Создаем копию и перемещаем элемент
+                    val updatedNodes = nodes.toMutableList()
+                    val movedNode = updatedNodes.removeAt(fromIndex)
+                    updatedNodes.add(toIndex, movedNode)
+
+                    // Обновляем порядковые номера
+                    val reorderedNodes = updatedNodes.mapIndexed { index, node ->
+                        node.copy(orderIndex = index)
+                    }
+
+                    println("📊 AFTER: ${reorderedNodes.map { it.name }}")
+
+                    // Сохраняем в базу
+                    withContext(Dispatchers.IO) {
+                        reorderedNodes.forEach { node ->
+                            database.nodeDao().updateOrder(node.id, node.orderIndex)
+                        }
+                    }
+
+                    // Обновляем UI
+                    loadNodesByTubeId(tubeId)
+                }
+            } catch (e: Exception) {
+                println("❌ ERROR: ${e.message}")
+            }
+        }
+    }
+}
 ----------------------------------------
 
 ------------------------------------------------------------
@@ -1467,6 +4124,220 @@ class NodeViewModelFactory(private val database: AppDatabase) : ViewModelProvide
 ----------------------------------------
 
 ------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\PKUItem.kt ---
+------------------------------------------------------------
+
+package com.example.kipia.ui
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.example.kipia.database.PKUEntity
+import com.example.kipia.database.SectionEntity
+
+@Composable
+fun PKUItem(
+    pku: PKUEntity,
+    sectionViewModel: SectionViewModel,
+    onEdit: (PKUEntity) -> Unit,
+    onDelete: () -> Unit,
+    onAddSection: (String, Long) -> Unit,
+    onViewSectionEquipment: (Long) -> Unit = {}
+) {
+    var expanded by remember { mutableStateOf(false) }
+    var showAddSectionDialog by remember { mutableStateOf(false) }
+
+    val sections by sectionViewModel.sections.collectAsState()
+
+    // Загружаем секции при создании
+    LaunchedEffect(pku.id) {
+        sectionViewModel.loadSectionsByPKUId(pku.id)
+    }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 2.dp),
+        elevation = 2.dp,
+        backgroundColor = MaterialTheme.colors.surface
+    ) {
+        Column(modifier = Modifier.padding(8.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Кнопка раскрытия/скрытия секций
+                IconButton(
+                    onClick = { expanded = !expanded },
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Icon(
+                        if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                        contentDescription = if (expanded) "Скрыть секции" else "Показать секции"
+                    )
+                }
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = pku.name,
+                        style = MaterialTheme.typography.body1,
+                        color = MaterialTheme.colors.onSurface
+                    )
+                    if (pku.description.isNotEmpty()) {
+                        Text(
+                            text = pku.description,
+                            style = MaterialTheme.typography.body2,
+                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
+                        )
+                    }
+                }
+
+                // Кнопка добавления секции
+                IconButton(
+                    onClick = { showAddSectionDialog = true },
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Add,
+                        contentDescription = "Добавить секцию",
+                        tint = MaterialTheme.colors.onSurface
+                    )
+                }
+
+                // Кнопка редактирования ПКУ
+                IconButton(
+                    onClick = { onEdit(pku) },
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Edit,
+                        contentDescription = "Редактировать ПКУ",
+                        tint = MaterialTheme.colors.onSurface
+                    )
+                }
+
+                // Кнопка удаления ПКУ
+                IconButton(
+                    onClick = onDelete,
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = "Удалить ПКУ",
+                        tint = MaterialTheme.colors.onSurface
+                    )
+                }
+            }
+
+            // Секции ПКУ (показываются при раскрытии)
+            if (expanded) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp)
+                ) {
+                    if (sections.isEmpty()) {
+                        Text(
+                            text = "Нет секций",
+                            style = MaterialTheme.typography.caption,
+                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+                            modifier = Modifier.padding(start = 32.dp, top = 8.dp, bottom = 8.dp)
+                        )
+                    } else {
+                        sections.forEach { section ->
+                            SectionItem(
+                                section = section,
+                                onViewEquipment = { onViewSectionEquipment(section.id) },
+                                onDeleteSection = { sectionViewModel.deleteSection(section) }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (showAddSectionDialog) {
+        AddSectionDialog(
+            pkuName = pku.name,
+            onDismiss = { showAddSectionDialog = false },
+            onConfirm = { sectionName ->
+                onAddSection(sectionName, pku.id)
+                showAddSectionDialog = false
+            }
+        )
+    }
+}
+
+// Обновленный компонент для отображения секции
+@Composable
+fun SectionItem(
+    section: SectionEntity,
+    onViewEquipment: () -> Unit,
+    onDeleteSection: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 32.dp, top = 4.dp, bottom = 4.dp)
+            .clickable { onViewEquipment() },
+        elevation = 1.dp,
+        backgroundColor = MaterialTheme.colors.surface.copy(alpha = 0.8f)
+    ) {
+        Row(
+            modifier = Modifier.padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = section.name,
+                style = MaterialTheme.typography.body2,
+                modifier = Modifier.weight(1f),
+                color = MaterialTheme.colors.onSurface
+            )
+
+            // Кнопка просмотра оборудования
+            IconButton(
+                onClick = onViewEquipment,
+                modifier = Modifier.size(20.dp)
+            ) {
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = "Просмотр оборудования",
+                    modifier = Modifier.size(14.dp),
+                    tint = MaterialTheme.colors.onSurface
+                )
+            }
+
+            // Кнопка удаления секции
+            IconButton(
+                onClick = onDeleteSection,
+                modifier = Modifier.size(20.dp)
+            ) {
+                Icon(
+                    Icons.Default.Delete,
+                    contentDescription = "Удалить секцию",
+                    modifier = Modifier.size(14.dp),
+                    tint = MaterialTheme.colors.onSurface
+                )
+            }
+        }
+    }
+}
+----------------------------------------
+
+------------------------------------------------------------
 --- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\PKUViewModel.kt ---
 ------------------------------------------------------------
 
@@ -1476,6 +4347,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.kipia.database.AppDatabase
 import com.example.kipia.database.PKUEntity
+import com.example.kipia.database.SectionEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -1487,39 +4359,64 @@ class PKUViewModel(private val database: AppDatabase) : ViewModel() {
     private val _pkus = MutableStateFlow<List<PKUEntity>>(emptyList())
     val pkus: StateFlow<List<PKUEntity>> = _pkus
 
-    // Метод loadPKUs остаётся, но теперь он загружает все ПКУ
-    fun loadPKUs() {
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
+
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage
+
+    fun loadPKUsByControlPointId(controlPointId: Long) {
         viewModelScope.launch {
-            val result = withContext(Dispatchers.IO) {
-                database.pkuDao().getAllPKUs()
+            _isLoading.value = true
+            _errorMessage.value = null
+            try {
+                val result = withContext(Dispatchers.IO) {
+                    database.pkuDao().getPKUsByControlPointId(controlPointId)
+                }
+                _pkus.value = result
+            } catch (e: Exception) {
+                _errorMessage.value = "Не удалось загрузить ПКУ: ${e.message}"
+            } finally {
+                _isLoading.value = false
             }
-            _pkus.value = result
         }
     }
 
-    // Метод loadPKUsByControlPointId - загрузка ПКУ по ID КП
-    fun loadPKUsByControlPointId(controlPointId: Long) {
-        viewModelScope.launch {
-            val result = withContext(Dispatchers.IO) {
-                database.pkuDao().getPKUsByControlPointId(controlPointId)
-            }
-            _pkus.value = result
-        }
+    fun clearError() {
+        _errorMessage.value = null
     }
 
     // Метод addPKU - добавление ПКУ, теперь требует controlPointId
+// Метод addPKU - добавление ПКУ
     fun addPKU(name: String, description: String = "", controlPointId: Long) {
         viewModelScope.launch {
             val pku = PKUEntity(name = name, description = description, controlPointId = controlPointId)
             withContext(Dispatchers.IO) {
                 database.pkuDao().insert(pku)
             }
-            // После добавления можно обновить список, например, через loadPKUs()
-            // или loadPKUsByControlPointId(controlPointId), если известен controlPointId
-            loadPKUsByControlPointId(controlPointId) // Пример: обновляем список для конкретного КП
+
+            // Находим созданный ПКУ и создаем для него стандартные секции
+            val pkus = withContext(Dispatchers.IO) {
+                database.pkuDao().getPKUsByControlPointId(controlPointId)
+            }
+            val newPKU = pkus.find { it.name == name && it.controlPointId == controlPointId }
+
+            newPKU?.let { pku ->
+                val defaultSections = listOf(
+                    SectionEntity(name = "Инженерный отсек", pkuId = pku.id),
+                    SectionEntity(name = "Трансформаторный отсек", pkuId = pku.id)
+                )
+
+                withContext(Dispatchers.IO) {
+                    defaultSections.forEach { section ->
+                        database.sectionDao().insert(section)
+                    }
+                }
+            }
+
+            loadPKUsByControlPointId(controlPointId)
         }
     }
-
     fun deletePKU(id: Long, controlPointId: Long) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -1544,6 +4441,29 @@ class PKUViewModel(private val database: AppDatabase) : ViewModel() {
         }
     }
 
+    // Создание стандартных секций для ПКУ
+    private fun createDefaultSectionsForPKU(pkuName: String, controlPointId: Long) {
+        viewModelScope.launch {
+            // Находим только что созданный ПКУ по имени и controlPointId
+            val pkus = withContext(Dispatchers.IO) {
+                database.pkuDao().getPKUsByControlPointId(controlPointId)
+            }
+            val newPKU = pkus.find { it.name == pkuName && it.controlPointId == controlPointId }
+
+            newPKU?.let { pku ->
+                val defaultSections = listOf(
+                    SectionEntity(name = "Инженерный отсек", pkuId = pku.id),
+                    SectionEntity(name = "Трансформаторный отсек", pkuId = pku.id)
+                )
+
+                withContext(Dispatchers.IO) {
+                    defaultSections.forEach { section ->
+                        database.sectionDao().insert(section)
+                    }
+                }
+            }
+        }
+    }
 }
 ----------------------------------------
 
@@ -1566,6 +4486,240 @@ class PKUViewModelFactory(private val database: AppDatabase) : ViewModelProvider
             return PKUViewModel(database) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
+----------------------------------------
+
+------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\RemarkViewModel.kt ---
+------------------------------------------------------------
+
+package com.example.kipia.ui
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.kipia.database.AppDatabase
+import com.example.kipia.database.RemarkEntity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+class RemarkViewModel(private val database: AppDatabase) : ViewModel() {
+
+    private val _remarks = MutableStateFlow<List<RemarkEntity>>(emptyList())
+    val remarks: StateFlow<List<RemarkEntity>> = _remarks
+
+    fun loadRemarksByControlPointId(controlPointId: Long) {
+        viewModelScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                database.remarkDao().getRemarksByControlPointId(controlPointId)
+            }
+            _remarks.value = result
+        }
+    }
+
+    fun updateRemarkCompletion(remarkId: Long, isCompleted: Boolean, completionDate: String) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                database.remarkDao().updateCompletionStatus(remarkId, isCompleted, completionDate)
+            }
+            // Обновляем список
+            loadRemarksByControlPointId(_remarks.value.firstOrNull()?.controlPointId ?: 0L)
+        }
+    }
+}
+
+----------------------------------------
+
+------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\RemarkViewModelFactory.kt ---
+------------------------------------------------------------
+
+package com.example.kipia.ui
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import com.example.kipia.database.AppDatabase
+
+class SectionViewModelFactory(private val database: AppDatabase) : ViewModelProvider.Factory {
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(SectionViewModel::class.java)) {
+            return SectionViewModel(database) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
+----------------------------------------
+
+------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\SectionViewModel.kt ---
+------------------------------------------------------------
+
+package com.example.kipia.ui
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.kipia.database.AppDatabase
+import com.example.kipia.database.SectionEntity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+class SectionViewModel(private val database: AppDatabase) : ViewModel() {
+
+    private val _sections = MutableStateFlow<List<SectionEntity>>(emptyList())
+    val sections: StateFlow<List<SectionEntity>> = _sections
+
+    fun loadSectionsByPKUId(pkuId: Long) {
+        viewModelScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                database.sectionDao().getSectionsByPKUId(pkuId)
+            }
+            _sections.value = result
+        }
+    }
+
+    fun addSection(name: String, pkuId: Long) {
+        viewModelScope.launch {
+            val section = SectionEntity(name = name, pkuId = pkuId)
+            withContext(Dispatchers.IO) {
+                database.sectionDao().insert(section)
+            }
+            loadSectionsByPKUId(pkuId)
+        }
+    }
+
+    fun deleteSection(section: SectionEntity) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                database.sectionDao().delete(section)
+            }
+            loadSectionsByPKUId(section.pkuId)
+        }
+    }
+}
+----------------------------------------
+
+------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\SimpleDragDropList.kt ---
+------------------------------------------------------------
+
+package com.example.kipia.ui
+
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun <T> SimpleDragDropList(
+    items: List<T>,
+    onMove: (Int, Int) -> Unit = { _, _ -> }, // Добавьте значение по умолчанию
+    modifier: Modifier = Modifier,
+    content: @Composable (T) -> Unit // Упростите до одного параметра
+) {
+    // Простая реализация без drag & drop
+    LazyColumn(modifier = modifier) {
+        items(items) { item ->
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 2.dp)
+            ) {
+                content(item)
+            }
+        }
+    }
+}
+----------------------------------------
+
+------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\SimpleDraggableNodeItem.kt ---
+------------------------------------------------------------
+
+// app/src/main/java/com/example/kipia/ui/SimpleDraggableNodeItem.kt
+package com.example.kipia.ui
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyItemScope
+import androidx.compose.material.Card
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun LazyItemScope.SimpleDraggableNodeItem(
+    node: com.example.kipia.database.NodeEntity,
+    onEdit: (com.example.kipia.database.NodeEntity) -> Unit,
+    onDelete: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 12.dp, top = 2.dp, bottom = 2.dp),
+        elevation = 1.dp
+    ) {
+        Row(
+            modifier = Modifier.padding(6.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Иконка для визуального обозначения возможности перетаскивания
+            Icon(
+                imageVector = Icons.Default.Menu,
+                contentDescription = "Перетащить",
+                modifier = Modifier
+                    .size(20.dp)
+                    .padding(end = 8.dp),
+                tint = androidx.compose.ui.graphics.Color.Gray
+            )
+
+            Text(
+                text = node.name,
+                style = androidx.compose.material.MaterialTheme.typography.body2,
+                modifier = Modifier.weight(1f)
+            )
+
+            // Кнопка редактирования объекта
+            IconButton(
+                onClick = { onEdit(node) },
+                modifier = Modifier.size(20.dp)
+            ) {
+                Icon(
+                    Icons.Default.Edit,
+                    contentDescription = "Редактировать объект",
+                    modifier = Modifier.size(14.dp)
+                )
+            }
+
+            // Кнопка удаления объекта
+            IconButton(
+                onClick = onDelete,
+                modifier = Modifier.size(20.dp)
+            ) {
+                Icon(
+                    Icons.Default.Delete,
+                    contentDescription = "Удалить объект",
+                    modifier = Modifier.size(14.dp)
+                )
+            }
+        }
     }
 }
 ----------------------------------------
@@ -1677,6 +4831,134 @@ val Typography = Typography(
 ----------------------------------------
 
 ------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\TubeItem.kt ---
+------------------------------------------------------------
+
+package com.example.kipia.ui
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.example.kipia.database.NodeEntity
+import kotlinx.coroutines.launch
+
+@Composable
+fun TubeItem(
+    tube: com.example.kipia.database.TubeEntity,
+    nodeViewModel: NodeViewModel,
+    onEdit: (com.example.kipia.database.TubeEntity) -> Unit,
+    onDelete: () -> Unit,
+    onAddNode: (String, com.example.kipia.model.NodeType) -> Unit,
+    onDeleteNode: (Long) -> Unit,
+    onEditNode: (com.example.kipia.database.NodeEntity) -> Unit,
+    onViewEquipment: (com.example.kipia.database.NodeEntity) -> Unit = {}
+) {
+    val nodesForThisTube by nodeViewModel.getNodesFlowForTube(tube.id).collectAsState()
+    var showAddNodeDialog by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(tube.id) {
+        nodeViewModel.loadNodesByTubeId(tube.id)
+    }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        elevation = 8.dp,
+        backgroundColor = MaterialTheme.colors.surface
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = tube.name,
+                    style = MaterialTheme.typography.h6,
+                    modifier = Modifier.weight(1f),
+                    color = MaterialTheme.colors.onSurface
+                )
+
+                IconButton(onClick = { onEdit(tube) }) {
+                    Icon(
+                        Icons.Default.Edit,
+                        contentDescription = "Редактировать",
+                        tint = MaterialTheme.colors.onSurface
+                    )
+                }
+
+                IconButton(onClick = { showAddNodeDialog = true }) {
+                    Icon(
+                        Icons.Default.Add,
+                        contentDescription = "Добавить объект",
+                        tint = MaterialTheme.colors.onSurface
+                    )
+                }
+
+                IconButton(onClick = onDelete) {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = "Удалить",
+                        tint = MaterialTheme.colors.onSurface
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Список объектов (ОД, В, Задвижки) - теперь без дублирования
+            if (nodesForThisTube.isNotEmpty()) {
+                val sortedNodes = nodesForThisTube.sortedBy { it.orderIndex }
+
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 500.dp)
+                ) {
+                    items(sortedNodes) { node ->
+                        // Используем NodeItemWithEquipment для всех объектов
+                        NodeItemWithEquipment(
+                            node = node,
+                            onEdit = { onEditNode(node) },
+                            onDelete = { onDeleteNode(node.id) },
+                            onViewEquipment = { onViewEquipment(node) }
+                        )
+                    }
+                }
+            } else {
+                Text(
+                    text = "📝 Нет объектов. Нажмите '+' чтобы добавить",
+                    style = MaterialTheme.typography.body2,
+                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+                    modifier = Modifier.padding(vertical = 24.dp)
+                )
+            }
+        }
+    }
+
+    if (showAddNodeDialog) {
+        AddNodeDialog(
+            tubeName = tube.name,
+            onDismiss = { showAddNodeDialog = false },
+            onConfirm = { name, type ->
+                onAddNode(name, type)
+                showAddNodeDialog = false
+            }
+        )
+    }
+
+
+}
+----------------------------------------
+
+------------------------------------------------------------
 --- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\TubeViewModel.kt ---
 ------------------------------------------------------------
 
@@ -1741,7 +5023,6 @@ class TubeViewModel(private val database: AppDatabase) : ViewModel() {
             }
         }
     }
-
 }
 ----------------------------------------
 
@@ -1763,6 +5044,263 @@ class TubeViewModelFactory(private val database: AppDatabase) : ViewModelProvide
             return TubeViewModel(database) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
+----------------------------------------
+
+------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\ViewEquipmentScreen.kt ---
+------------------------------------------------------------
+
+// app/src/main/java/com/example/kipia/ui/ViewEquipmentScreen.kt
+package com.example.kipia.ui
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.kipia.database.AppDatabase
+import com.example.kipia.database.DetailedEquipmentEntity
+import com.example.kipia.model.EquipmentType
+
+@Composable
+fun ViewEquipmentScreen(
+    equipmentId: Long,
+    onBackClick: () -> Unit,
+    onEditClick: () -> Unit
+) {
+    val context = LocalContext.current
+    val equipmentViewModel: EquipmentViewModel = viewModel(
+        factory = EquipmentViewModelFactory(AppDatabase.getInstance(context))
+    )
+
+    var currentEquipment by remember { mutableStateOf<DetailedEquipmentEntity?>(null) }
+
+    // Загружаем оборудование при открытии
+    LaunchedEffect(equipmentId) {
+        val equipment = equipmentViewModel.getEquipmentById(equipmentId)
+        currentEquipment = equipment
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Просмотр оборудования") },
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Назад")
+                    }
+                },
+                actions = {
+                    IconButton(
+                        onClick = onEditClick,
+                        enabled = currentEquipment != null
+                    ) {
+                        Icon(Icons.Default.Edit, contentDescription = "Редактировать")
+                    }
+                }
+            )
+        }
+    ) { innerPadding ->
+        currentEquipment?.let { equipment ->
+            EquipmentView(
+                equipment = equipment,
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp)
+            )
+        } ?: run {
+            Box(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+    }
+}
+
+@Composable
+fun EquipmentView(
+    equipment: DetailedEquipmentEntity,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier) {
+        // Основная информация
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            elevation = 4.dp
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = "Основная информация",
+                    style = MaterialTheme.typography.h6,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                EquipmentInfoRow("Название", equipment.name)
+                EquipmentInfoRow("Тип оборудования", EquipmentType.valueOf(equipment.equipmentType).displayName)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Общие характеристики
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            elevation = 4.dp
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = "Общие характеристики",
+                    style = MaterialTheme.typography.h6,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                EquipmentInfoRow("Модель", equipment.model)
+                EquipmentInfoRow("Производитель", equipment.manufacturer)
+                EquipmentInfoRow("Заводской номер", equipment.serialNumber)
+                EquipmentInfoRow("Год выпуска", equipment.productionYear)
+                EquipmentInfoRow("Год поверки", equipment.verificationYear)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+// В функции EquipmentView в ViewEquipmentScreen.kt обновляем блок специфических характеристик:
+
+// Специфические характеристики
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            elevation = 4.dp
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = "Специфические характеристики",
+                    style = MaterialTheme.typography.h6,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                EquipmentInfoRow("Номинал", equipment.nominal)
+                EquipmentInfoRow("Граница давления", equipment.pressureLimit)
+                EquipmentInfoRow("Версия ПО", equipment.softwareVersion)
+
+                // Дополнительные характеристики для БУР, БКЭП и других релейных защит
+                if (equipment.equipmentType in listOf("BUR", "BKEP", "DPS", "BKP", "UZR")) {
+                    EquipmentInfoRow("МО", equipment.mo)
+                    EquipmentInfoRow("МЗ", equipment.mz)
+                    EquipmentInfoRow("МТО", equipment.mto)
+                    EquipmentInfoRow("МТЗ", equipment.mtz)
+                    EquipmentInfoRow("МУО", equipment.muo)
+                    EquipmentInfoRow("МУЗ", equipment.muz)
+                    EquipmentInfoRow("Кол.об.вых.зв", equipment.outputContacts)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun EquipmentInfoRow(label: String, value: String) {
+    if (value.isNotEmpty()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "$label:",
+                style = MaterialTheme.typography.body2,
+                color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
+            )
+            Text(
+                text = value,
+                style = MaterialTheme.typography.body2
+            )
+        }
+    }
+}
+----------------------------------------
+
+------------------------------------------------------------
+--- Source Code: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\utils\NameUtils.kt ---
+------------------------------------------------------------
+
+package com.example.kipia.utils
+
+object NameUtils {
+
+    // Соответствие КП для СП и ХК
+    private val kpMapping = mapOf(
+        "867" to "1101",
+        "878" to "1113",
+        "890" to "1126",
+        "911" to "1146",
+        "912" to "1147",
+        "924" to "1159",
+        "937" to "1172",
+        "950" to "1185"
+        // 1194 остается без изменений
+    )
+
+    // Получить название ПКУ от КП
+    fun getPKUNameFromKP(kpName: String): String {
+        return "ПКУ $kpName"
+    }
+
+    // Получить варианты названий участков МН от КП
+    fun getTubeNameOptionsFromKP(kpName: String): List<String> {
+        val kpNumber = extractNumber(kpName)
+        val options = mutableListOf<String>()
+
+        // Вариант СП
+        options.add("Участок МН $kpNumber км СП")
+
+        // Вариант ХК (если есть соответствие)
+        kpMapping[kpNumber]?.let { hkNumber ->
+            options.add("Участок МН $hkNumber км ХК")
+        }
+
+        // Свой вариант
+        options.add("Участок МН $kpNumber км")
+
+        return options
+    }
+
+    // Получить префикс для колодцев от участка МН
+    fun getNodePrefixFromTube(tubeName: String): Pair<String, String> {
+        return when {
+            tubeName.contains("ОД") || tubeName.contains("СП") -> "ОД" to "ОД"
+            tubeName.contains("В") || tubeName.contains("ХК") -> "В" to "В"
+            tubeName.contains("Задвижка") -> "Задвижка" to "Задвижка"
+            else -> "Объект" to ""
+        }
+    }
+
+    // Извлечь число из названия КП
+    private fun extractNumber(kpName: String): String {
+        val regex = """(\d+)""".toRegex()
+        return regex.find(kpName)?.value ?: ""
+    }
+
+    // Получить номер для колодца из названия участка МН
+    fun getNodeNumberFromTube(tubeName: String): String {
+        val regex = """(\d+)""".toRegex()
+        return regex.find(tubeName)?.value ?: ""
     }
 }
 ----------------------------------------
