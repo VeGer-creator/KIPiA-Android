@@ -1,4 +1,3 @@
-// app/src/main/java/com/example/kipia/ui/EventViewModelFactory.kt
 package com.example.kipia.ui
 
 import androidx.lifecycle.ViewModel

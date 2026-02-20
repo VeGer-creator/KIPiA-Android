@@ -1,4 +1,3 @@
-// DetailedEquipmentEntity.kt
 package com.example.kipia.database
 
 import androidx.room.Entity
@@ -30,10 +29,10 @@ import androidx.room.PrimaryKey
 data class DetailedEquipmentEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0L,
-    val equipmentType: String, // Тип оборудования из EquipmentType
-    val name: String, // Название оборудования
-    val nodeId: Long? = null, // Привязка к узлу (ОД, В, Задвижка)
-    val sectionId: Long? = null, // Привязка к отсеку ПКУ
+    val equipmentType: String = "", // ИСПРАВЛЕНО: значение по умолчанию
+    val name: String = "", // ИСПРАВЛЕНО: значение по умолчанию
+    val nodeId: Long? = null,
+    val sectionId: Long? = null,
 
     // Общие характеристики
     val model: String = "",
@@ -43,14 +42,17 @@ data class DetailedEquipmentEntity(
     val verificationYear: String = "",
 
     // Специфические характеристики
-    val nominal: String = "", // Номинал
-    val pressureLimit: String = "", // Граница давления для манометров
-    val softwareVersion: String = "", // Версия ПО
-    val mo: String = "", // МО
-    val mz: String = "", // МЗ
-    val mto: String = "", // МТО
-    val mtz: String = "", // МТЗ
-    val muo: String = "", // МУО
-    val muz: String = "", // МУЗ
-    val outputContacts: String = "" // Кол.об.вых.зв
+    val nominal: String = "",
+    val pressureLimit: String = "",
+    val softwareVersion: String = "",
+    val mo: String = "",
+    val mz: String = "",
+    val mto: String = "",
+    val mtz: String = "",
+    val muo: String = "",
+    val muz: String = "",
+    val outputContacts: String = "",
+
+    // ДОБАВЛЕНО ПОЛЕ ДЛЯ ФОТО
+    val photoPaths: String = ""
 )

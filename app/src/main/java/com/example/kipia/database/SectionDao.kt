@@ -1,10 +1,7 @@
 package com.example.kipia.database
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
-import androidx.room.Delete
+import androidx.room.*
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SectionDao {
@@ -21,9 +18,15 @@ interface SectionDao {
     @Query("SELECT * FROM section_table WHERE id = :id")
     suspend fun getSectionById(id: Long): SectionEntity?
 
+    @Update
+    suspend fun update(section: SectionEntity)
+
     @Delete
     suspend fun delete(section: SectionEntity)
 
     @Query("DELETE FROM section_table WHERE id = :id")
     suspend fun deleteById(id: Long)
+
+    @Query("SELECT * FROM section_table")
+    suspend fun getAllSections(): List<SectionEntity>
 }

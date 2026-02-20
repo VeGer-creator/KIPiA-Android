@@ -18,6 +18,9 @@ interface TubeDao {
     @Query("SELECT * FROM tube_table WHERE controlPointId = :controlPointId")
     suspend fun getTubesByControlPointId(controlPointId: Long): List<TubeEntity>
 
+    @Query("SELECT * FROM tube_table")
+    suspend fun getAllTubes(): List<TubeEntity>
+
     @Query("SELECT * FROM tube_table WHERE id = :id")
     suspend fun getTubeById(id: Long): TubeEntity?
 

@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Delete
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ControlPointDao {
@@ -18,6 +19,9 @@ interface ControlPointDao {
     @Query("SELECT * FROM control_point_table ORDER BY name ASC")
     suspend fun getAllControlPoints(): List<ControlPointEntity>
 
+    @Query("SELECT * FROM control_point_table ORDER BY name ASC")
+    fun getAllControlPointsFlow(): Flow<List<ControlPointEntity>>
+
     @Query("SELECT * FROM control_point_table WHERE id = :id")
     suspend fun getControlPointById(id: Long): ControlPointEntity?
 
@@ -27,7 +31,6 @@ interface ControlPointDao {
     @Query("DELETE FROM control_point_table WHERE id = :id")
     suspend fun deleteById(id: Long)
 
-    // Исправленный метод update
     @Query("UPDATE control_point_table SET name = :name, description = :description WHERE id = :id")
     suspend fun update(id: Long, name: String, description: String)
 }

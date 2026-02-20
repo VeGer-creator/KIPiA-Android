@@ -1,0 +1,999 @@
+================================================================================
+--- АНДРОИД ПРОЕКТ ПАРСЕР ---
+================================================================================
+Путь к проекту: E:\AndroidStudioProjects\KIPiA_1.0
+Тип проекта: android
+Только структура: True
+Выбор файлов: Выключен
+Количество выбранных файлов: 110
+Время запуска парсера: 0.0
+
+================================================================================
+--- СТРУКТУРА ПРОЕКТА (только важные файлы) ---
+================================================================================
+KIPiA_1.0/
+  .gitignore
+  build.gradle.kts
+  gradle.properties
+  gradlew
+  gradlew.bat
+  KIPiA_1.0_parsed_android_full_selected_output.txt
+  KIPiA_1.0_parsed_android_structure_all_output.txt
+  local.properties
+  settings.gradle.kts
+  .kotlin/
+    errors/
+      errors-1763041483556.log
+      errors-1763041783863.log
+      errors-1763072804995.log
+      errors-1763725841172.log
+    sessions/
+  app/
+    .gitignore
+    build.gradle.kts
+    proguard-rules.pro
+    debug/
+      output-metadata.json
+    src/
+      androidTest/
+        java/
+          com/
+            example/
+              kipia/
+                ExampleInstrumentedTest.kt
+      main/
+        AndroidManifest.xml
+        ic_launcher-playstore.png
+        java/
+          com/
+            example/
+              kipia/
+                MainActivity.kt
+                SplashActivity.kt
+                data/
+                  PreferencesManager.kt
+                database/
+                  AppDatabase.kt
+                  ControlPointDao.kt
+                  ControlPointEntity.kt
+                  DetailedEquipmentDao.kt
+                  DetailedEquipmentEntity.kt
+                  EquipmentDao.kt
+                  EquipmentEntity.kt
+                  EventDao.kt
+                  EventEntity.kt
+                  NodeDao.kt
+                  NodeEntity.kt
+                  PKUDao.kt
+                  PKUEntity.kt
+                  RemarkDao.kt
+                  RemarkEntity.kt
+                  SectionDao.kt
+                  SectionEntity.kt
+                  TubeDao.kt
+                  TubeEntity.kt
+                model/
+                  EquipmentType.kt
+                  NodeType.kt
+                  PKU.kt
+                  SectionType.kt
+                  Tube.kt
+                sync/
+                  ConflictResolver.kt
+                  DataMerger.kt
+                  EnhancedDataMerger.kt
+                  EnhancedSyncManager.kt
+                  NearbySyncService.kt
+                  PhotoSyncUtils.kt
+                  SyncManager.kt
+                  SyncModels.kt
+                ui/
+                  AddEquipmentDialog.kt
+                  AddNodeDialog.kt
+                  AddPKUDialog.kt
+                  AddRemarkDialog.kt
+                  AddSectionDialog.kt
+                  AddSectionEquipmentDialog.kt
+                  AddTubeDialog.kt
+                  AdvancedSyncScreen.kt
+                  ControlPointDetailScreen.kt
+                  ControlPointListScreen.kt
+                  ControlPointViewModel.kt
+                  ControlPointViewModelFactory.kt
+                  EditEquipmentScreen.kt
+                  EditNameDialog.kt
+                  EditRemarkDialog.kt
+                  EquipmentDetailScreen.kt
+                  EquipmentPhotoComponents.kt
+                  EquipmentPhotoScreen.kt
+                  EquipmentViewModel.kt
+                  EquipmentViewModelFactory.kt
+                  EventViewModel.kt
+                  EventViewModelFactory.kt
+                  FullScreenPhotoView.kt
+                  HelpScreen.kt
+                  NodeItem.kt
+                  NodeItemWithEquipment.kt
+                  NodeViewModel.kt
+                  NodeViewModelFactory.kt
+                  PermissionScreen.kt
+                  PhotoPickerUtils.kt
+                  PKUItem.kt
+                  PKUViewModel.kt
+                  PKUViewModelFactory.kt
+                  RemarkComponents.kt
+                  RemarkDetailScreen.kt
+                  RemarksTab.kt
+                  RemarksTabWithArchive.kt
+                  RemarkUtils.kt
+                  RemarkViewModel.kt
+                  RemarkViewModelFactory.kt
+                  SectionViewModel.kt
+                  SectionViewModelFactory.kt
+                  SettingsScreen.kt
+                  SimpleDraggableNodeItem.kt
+                  SyncScreen.kt
+                  SyncState.kt
+                  SyncViewModel.kt
+                  SyncViewModelFactory.kt
+                  TubeItem.kt
+                  TubeViewModel.kt
+                  TubeViewModelFactory.kt
+                  ViewEquipmentScreen.kt
+                  ViewRemarkDialog.kt
+                  ViewRemarkScreen.kt
+                  ViewRemarkUtils.kt
+                  theme/
+                    Color.kt
+                    Shapes.kt
+                    Theme.kt
+                    Typography.kt
+                utils/
+                  EquipmentPhotoUtils.kt
+                  NameUtils.kt
+                  PermissionUtils.kt
+                  PhotoStorageUtils.kt
+        res/
+          drawable/
+            ic_launcher_background.xml
+          drawable-v24/
+            ic_launcher_foreground.xml
+          layout/
+            activity_splash.xml
+            activity_splash11.xml
+          mipmap-anydpi-v26/
+            ic_launcher.xml
+            ic_launcher_round.xml
+          mipmap-hdpi/
+            ic_launcher.webp
+            ic_launcher_foreground.webp
+            ic_launcher_round.webp
+          mipmap-mdpi/
+            ic_launcher.webp
+            ic_launcher_foreground.webp
+            ic_launcher_round.webp
+          mipmap-xhdpi/
+            ic_launcher.webp
+            ic_launcher_foreground.webp
+            ic_launcher_round.webp
+          mipmap-xxhdpi/
+            ic_launcher.webp
+            ic_launcher_foreground.webp
+            ic_launcher_round.webp
+          mipmap-xxxhdpi/
+            ic_launcher.webp
+            ic_launcher_foreground.webp
+            ic_launcher_round.webp
+          raw/
+            splash_video.mp4
+          values/
+            colors.xml
+            strings.xml
+            themes.xml
+          xml/
+            backup_rules.xml
+            data_extraction_rules.xml
+            file_paths.xml
+      test/
+        java/
+          com/
+            example/
+              kipia/
+                ExampleUnitTest.kt
+  error/
+    buildgradle.txt
+    err1.txt
+    err10.txt
+    err2.txt
+    err4.txt
+    err5.txt
+    err6.txt
+    err7.txt
+    err8.txt
+    err9.txt
+    File.txt
+    File1.txt
+    File2.txt
+    Структура и описание.txt
+    Характеристики_Оборудования.txt
+  gradle/
+    libs.versions.toml
+    wrapper/
+      gradle-wrapper.properties
+================================================================================
+--- ВЫБРАННЫЕ ФАЙЛЫ ---
+================================================================================
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\AndroidManifest.xml ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\AndroidManifest.xml
+Размер: 3092 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\build.gradle.kts ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\build.gradle.kts
+Размер: 345 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\build.gradle.kts ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\build.gradle.kts
+Размер: 4285 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\androidTest\java\com\example\kipia\ExampleInstrumentedTest.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\androidTest\java\com\example\kipia\ExampleInstrumentedTest.kt
+Размер: 661 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\data\PreferencesManager.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\data\PreferencesManager.kt
+Размер: 3079 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\AppDatabase.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\AppDatabase.kt
+Размер: 2037 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\ControlPointDao.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\ControlPointDao.kt
+Размер: 1256 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\ControlPointEntity.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\ControlPointEntity.kt
+Размер: 402 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\DetailedEquipmentDao.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\DetailedEquipmentDao.kt
+Размер: 1530 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\DetailedEquipmentEntity.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\DetailedEquipmentEntity.kt
+Размер: 1790 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\EquipmentDao.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\EquipmentDao.kt
+Размер: 1513 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\EquipmentEntity.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\EquipmentEntity.kt
+Размер: 1386 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\EventDao.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\EventDao.kt
+Размер: 844 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\EventEntity.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\EventEntity.kt
+Размер: 1126 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\NodeDao.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\NodeDao.kt
+Размер: 1272 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\NodeEntity.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\NodeEntity.kt
+Размер: 764 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\PKUDao.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\PKUDao.kt
+Размер: 1070 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\PKUEntity.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\PKUEntity.kt
+Размер: 722 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\RemarkDao.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\RemarkDao.kt
+Размер: 2273 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\RemarkEntity.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\RemarkEntity.kt
+Размер: 1996 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\SectionDao.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\SectionDao.kt
+Размер: 926 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\SectionEntity.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\SectionEntity.kt
+Размер: 646 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\TubeDao.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\TubeDao.kt
+Размер: 1055 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\TubeEntity.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\database\TubeEntity.kt
+Размер: 676 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\MainActivity.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\MainActivity.kt
+Размер: 25023 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\model\EquipmentType.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\model\EquipmentType.kt
+Размер: 1527 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\model\NodeType.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\model\NodeType.kt
+Размер: 484 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\model\PKU.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\model\PKU.kt
+Размер: 335 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\model\SectionType.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\model\SectionType.kt
+Размер: 204 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\model\Tube.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\model\Tube.kt
+Размер: 283 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\SplashActivity.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\SplashActivity.kt
+Размер: 2381 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\sync\ConflictResolver.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\sync\ConflictResolver.kt
+Размер: 4449 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\sync\DataMerger.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\sync\DataMerger.kt
+Размер: 13998 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\sync\EnhancedDataMerger.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\sync\EnhancedDataMerger.kt
+Размер: 18846 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\sync\EnhancedSyncManager.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\sync\EnhancedSyncManager.kt
+Размер: 6392 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\sync\NearbySyncService.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\sync\NearbySyncService.kt
+Размер: 14402 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\sync\PhotoSyncUtils.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\sync\PhotoSyncUtils.kt
+Размер: 6205 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\sync\SyncManager.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\sync\SyncManager.kt
+Размер: 6957 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\sync\SyncModels.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\sync\SyncModels.kt
+Размер: 12106 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\AddEquipmentDialog.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\AddEquipmentDialog.kt
+Размер: 5101 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\AddNodeDialog.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\AddNodeDialog.kt
+Размер: 6777 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\AddPKUDialog.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\AddPKUDialog.kt
+Размер: 2819 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\AddRemarkDialog.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\AddRemarkDialog.kt
+Размер: 12124 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\AddSectionDialog.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\AddSectionDialog.kt
+Размер: 2183 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\AddSectionEquipmentDialog.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\AddSectionEquipmentDialog.kt
+Размер: 5241 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\AddTubeDialog.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\AddTubeDialog.kt
+Размер: 4204 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\AdvancedSyncScreen.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\AdvancedSyncScreen.kt
+Размер: 13747 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\ControlPointDetailScreen.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\ControlPointDetailScreen.kt
+Размер: 19339 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\ControlPointListScreen.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\ControlPointListScreen.kt
+Размер: 5529 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\ControlPointViewModel.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\ControlPointViewModel.kt
+Размер: 1981 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\ControlPointViewModelFactory.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\ControlPointViewModelFactory.kt
+Размер: 587 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\EditEquipmentScreen.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\EditEquipmentScreen.kt
+Размер: 13897 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\EditNameDialog.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\EditNameDialog.kt
+Размер: 3071 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\EditRemarkDialog.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\EditRemarkDialog.kt
+Размер: 9600 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\EquipmentDetailScreen.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\EquipmentDetailScreen.kt
+Размер: 16199 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\EquipmentPhotoComponents.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\EquipmentPhotoComponents.kt
+Размер: 2378 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\EquipmentPhotoScreen.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\EquipmentPhotoScreen.kt
+Размер: 9978 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\EquipmentViewModel.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\EquipmentViewModel.kt
+Размер: 5725 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\EquipmentViewModelFactory.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\EquipmentViewModelFactory.kt
+Размер: 578 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\EventViewModel.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\EventViewModel.kt
+Размер: 2912 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\EventViewModelFactory.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\EventViewModelFactory.kt
+Размер: 566 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\FullScreenPhotoView.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\FullScreenPhotoView.kt
+Размер: 21323 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\HelpScreen.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\HelpScreen.kt
+Размер: 5454 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\NodeItem.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\NodeItem.kt
+Размер: 2422 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\NodeItemWithEquipment.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\NodeItemWithEquipment.kt
+Размер: 2801 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\NodeViewModel.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\NodeViewModel.kt
+Размер: 8064 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\NodeViewModelFactory.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\NodeViewModelFactory.kt
+Размер: 563 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\PermissionScreen.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\PermissionScreen.kt
+Размер: 14363 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\PhotoPickerUtils.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\PhotoPickerUtils.kt
+Размер: 807 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\PKUItem.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\PKUItem.kt
+Размер: 7896 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\PKUViewModel.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\PKUViewModel.kt
+Размер: 3875 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\PKUViewModelFactory.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\PKUViewModelFactory.kt
+Размер: 612 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\RemarkComponents.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\RemarkComponents.kt
+Размер: 9629 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\RemarkDetailScreen.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\RemarkDetailScreen.kt
+Размер: 9521 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\RemarksTab.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\RemarksTab.kt
+Размер: 11979 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\RemarksTabWithArchive.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\RemarksTabWithArchive.kt
+Размер: 16249 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\RemarkUtils.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\RemarkUtils.kt
+Размер: 2477 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\RemarkViewModel.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\RemarkViewModel.kt
+Размер: 8277 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\RemarkViewModelFactory.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\RemarkViewModelFactory.kt
+Размер: 569 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\SectionViewModel.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\SectionViewModel.kt
+Размер: 1490 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\SectionViewModelFactory.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\SectionViewModelFactory.kt
+Размер: 572 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\SettingsScreen.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\SettingsScreen.kt
+Размер: 1897 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\SimpleDraggableNodeItem.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\SimpleDraggableNodeItem.kt
+Размер: 2764 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\SyncScreen.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\SyncScreen.kt
+Размер: 15752 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\SyncState.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\SyncState.kt
+Размер: 542 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\SyncViewModel.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\SyncViewModel.kt
+Размер: 8397 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\SyncViewModelFactory.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\SyncViewModelFactory.kt
+Размер: 609 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\theme\Color.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\theme\Color.kt
+Размер: 212 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\theme\Shapes.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\theme\Shapes.kt
+Размер: 308 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\theme\Theme.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\theme\Theme.kt
+Размер: 872 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\theme\Typography.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\theme\Typography.kt
+Размер: 794 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\TubeItem.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\TubeItem.kt
+Размер: 4613 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\TubeViewModel.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\TubeViewModel.kt
+Размер: 2348 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\TubeViewModelFactory.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\TubeViewModelFactory.kt
+Размер: 630 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\ViewEquipmentScreen.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\ViewEquipmentScreen.kt
+Размер: 6995 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\ViewRemarkDialog.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\ViewRemarkDialog.kt
+Размер: 8032 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\ViewRemarkScreen.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\ViewRemarkScreen.kt
+Размер: 8116 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\ViewRemarkUtils.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\ui\ViewRemarkUtils.kt
+Размер: 890 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\utils\EquipmentPhotoUtils.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\utils\EquipmentPhotoUtils.kt
+Размер: 1674 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\utils\NameUtils.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\utils\NameUtils.kt
+Размер: 2256 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\utils\PermissionUtils.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\utils\PermissionUtils.kt
+Размер: 1219 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\utils\PhotoStorageUtils.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\java\com\example\kipia\utils\PhotoStorageUtils.kt
+Размер: 2396 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\test\java\com\example\kipia\ExampleUnitTest.kt ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\test\java\com\example\kipia\ExampleUnitTest.kt
+Размер: 341 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\res\layout\activity_splash.xml ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\res\layout\activity_splash.xml
+Размер: 453 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\res\layout\activity_splash11.xml ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\res\layout\activity_splash11.xml
+Размер: 454 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\res\values\strings.xml ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\res\values\strings.xml
+Размер: 67 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\res\values\colors.xml ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\res\values\colors.xml
+Размер: 414 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\res\xml\backup_rules.xml ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\res\xml\backup_rules.xml
+Размер: 478 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\res\xml\data_extraction_rules.xml ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\res\xml\data_extraction_rules.xml
+Размер: 551 байт
+
+------------------------------------------------------------
+--- Файл: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\res\xml\file_paths.xml ---
+------------------------------------------------------------
+
+Путь: E:\AndroidStudioProjects\KIPiA_1.0\app\src\main\res\xml\file_paths.xml
+Размер: 216 байт
+================================================================================
+--- ПАРСИНГ ЗАВЕРШЕН ---
+================================================================================
+Результаты сохранены в: E:\AndroidStudioProjects\KIPiA_1.0\KIPiA_1.0_parsed_android_structure_all_output.txt

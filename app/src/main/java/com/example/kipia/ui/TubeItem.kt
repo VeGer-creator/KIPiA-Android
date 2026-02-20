@@ -12,7 +12,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.kipia.database.NodeEntity
 import kotlinx.coroutines.launch
 
 @Composable
@@ -26,7 +25,7 @@ fun TubeItem(
     onEditNode: (com.example.kipia.database.NodeEntity) -> Unit,
     onViewEquipment: (com.example.kipia.database.NodeEntity) -> Unit = {}
 ) {
-    val nodesForThisTube by nodeViewModel.getNodesFlowForTube(tube.id).collectAsState()
+    val nodesForThisTube by nodeViewModel.getNodesFlowForTube(tube.id).collectAsState(initial = emptyList())
     var showAddNodeDialog by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
@@ -117,6 +116,4 @@ fun TubeItem(
             }
         )
     }
-
-
 }

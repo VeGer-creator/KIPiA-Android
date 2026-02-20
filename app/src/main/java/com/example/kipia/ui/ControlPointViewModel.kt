@@ -1,6 +1,7 @@
 package com.example.kipia.ui
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.kipia.database.AppDatabase
 import com.example.kipia.database.ControlPointEntity
@@ -14,6 +15,8 @@ class ControlPointViewModel(private val database: AppDatabase) : ViewModel() {
 
     private val _controlPoints = MutableStateFlow<List<ControlPointEntity>>(emptyList())
     val controlPoints: StateFlow<List<ControlPointEntity>> = _controlPoints
+
+
 
     init {
         loadControlPoints()
@@ -58,3 +61,4 @@ class ControlPointViewModel(private val database: AppDatabase) : ViewModel() {
 
 
 }
+

@@ -1,5 +1,6 @@
 package com.example.kipia.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -17,12 +18,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import android.net.Uri
 import com.example.kipia.database.AppDatabase
 import com.example.kipia.database.ControlPointEntity
 import com.example.kipia.database.PKUEntity
 import com.example.kipia.database.TubeEntity
 import com.example.kipia.database.SectionEntity
 import com.example.kipia.database.NodeEntity
+import com.example.kipia.model.NodeType
 import kotlinx.coroutines.launch
 
 @Composable
@@ -31,13 +35,17 @@ fun ControlPointDetailScreen(
     pkuViewModel: PKUViewModel,
     tubeViewModel: TubeViewModel,
     nodeViewModel: NodeViewModel,
+    equipmentViewModel: EquipmentViewModel,
     onBackClick: () -> Unit,
     onAddPKU: (String, String) -> Unit,
     onDeletePKU: (Long) -> Unit,
     onAddTube: (String) -> Unit,
     onDeleteTube: (Long) -> Unit,
-    onAddNode: (String, Long, com.example.kipia.model.NodeType) -> Unit,
-    onDeleteNode: (Long, Long) -> Unit
+    onAddNode: (String, Long, NodeType) -> Unit,
+    onDeleteNode: (Long, Long) -> Unit,
+    onViewEquipment: (Long, String) -> Unit = { _, _ -> },
+    onViewSectionEquipment: (Long, String) -> Unit = { _, _ -> },
+    onViewEquipmentPhotos: (Long, List<String>) -> Unit = { _, _ -> }
 ) {
     val context = LocalContext.current
     val controlPointViewModel: ControlPointViewModel = viewModel(
@@ -48,13 +56,26 @@ fun ControlPointDetailScreen(
         factory = SectionViewModelFactory(AppDatabase.getInstance(context))
     )
 
+    val remarkViewModel: RemarkViewModel = viewModel(
+        factory = RemarkViewModelFactory(AppDatabase.getInstance(context))
+    )
+    val eventViewModel: EventViewModel = viewModel(
+        factory = EventViewModelFactory(AppDatabase.getInstance(context))
+    )
+
+    // ДОБАВЛЯЕМ СОСТОЯНИЯ ДЛЯ ВКЛАДОК
+    var selectedTabIndex by remember { mutableStateOf(0) }
+    val tabs = listOf("ПКУ/Участки", "Замечания", "События")
+
     val pkus by pkuViewModel.pkus.collectAsState()
     val tubes by tubeViewModel.tubes.collectAsState()
     val coroutineScope = rememberCoroutineScope()
+    val remarks by remarkViewModel.remarks.collectAsState()
 
     var showAddPKUDialog by remember { mutableStateOf(false) }
     var showAddTubeDialog by remember { mutableStateOf(false) }
     var showEditControlPointDialog by remember { mutableStateOf(false) }
+    var showAddRemarkDialog by remember { mutableStateOf(false) }
 
     // Состояния для редактирования
     var editingPKU by remember { mutableStateOf<PKUEntity?>(null) }
@@ -72,6 +93,7 @@ fun ControlPointDetailScreen(
     LaunchedEffect(controlPoint.id) {
         pkuViewModel.loadPKUsByControlPointId(controlPoint.id)
         tubeViewModel.loadTubesByControlPointId(controlPoint.id)
+        remarkViewModel.loadAllRemarksByControlPointId(controlPoint.id)
     }
 
     Scaffold(
@@ -95,128 +117,191 @@ fun ControlPointDetailScreen(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
-                .padding(16.dp)
         ) {
-            if (controlPoint.description.isNotEmpty()) {
-                Text(
-                    text = controlPoint.description,
-                    style = MaterialTheme.typography.body2,
-                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f),
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
+            // ВКЛАДКИ
+            TabRow(selectedTabIndex = selectedTabIndex) {
+                tabs.forEachIndexed { index, title ->
+                    Tab(
+                        text = { Text(title) },
+                        selected = selectedTabIndex == index,
+                        onClick = { selectedTabIndex = index }
+                    )
+                }
             }
 
-            // Секция ПКУ с кнопкой добавления в одной строке
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("ПКУ", style = MaterialTheme.typography.h6)
-                Row {
-                    // Кнопка добавления ПКУ
-                    IconButton(
-                        onClick = { showAddPKUDialog = true },
-                        modifier = Modifier.size(40.dp)
+            // СОДЕРЖИМОЕ ВКЛАДОК
+            when (selectedTabIndex) {
+                0 -> { // ВКЛАДКА ПКУ/УЧАСТКИ МН
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp)
                     ) {
-                        Icon(Icons.Default.Add, contentDescription = "Добавить ПКУ")
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(2.dp))
-
-            // Список ПКУ с фиксированной высотой
-            if (pkus.isNotEmpty()) {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(max = 150.dp)
-                ) {
-                    items(pkus) { pku ->
-                        PKUItem(
-                            pku = pku,
-                            sectionViewModel = sectionViewModel,
-                            onEdit = { editingPKU = pku },
-                            onDelete = { onDeletePKU(pku.id) },
-                            onAddSection = { sectionName, pkuId ->
-                                sectionViewModel.addSection(sectionName, pkuId)
-                            },
-                            onViewSectionEquipment = { sectionId ->
-                                // Находим реальную секцию по ID
-                                val sections = sectionViewModel.sections.value
-                                val section = sections.find { it.id == sectionId }
-                                selectedSectionForEquipment = section ?: SectionEntity(
-                                    id = sectionId,
-                                    name = "Отсек $sectionId",
-                                    pkuId = pku.id
-                                )
-                            }                        )
-                    }
-                }
-            } else {
-                Text(
-                    text = "Нет ПКУ",
-                    style = MaterialTheme.typography.caption,
-                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f),
-                    modifier = Modifier.padding(vertical = 8.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Секция Участков МН с кнопкой добавления в одной строке
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("Участки МН", style = MaterialTheme.typography.h6)
-                IconButton(
-                    onClick = { showAddTubeDialog = true },
-                    modifier = Modifier.size(40.dp)
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = "Добавить участок МН")
-                }
-            }
-
-            Spacer(modifier = Modifier.height(2.dp))
-
-            // Список участков МН занимает оставшееся пространство
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState())
-            ) {
-                tubes.forEach { tube ->
-                    TubeItem(
-                        tube = tube,
-                        nodeViewModel = nodeViewModel,
-                        onEdit = { editingTube = tube },
-                        onDelete = {
-                            onDeleteTube(tube.id)
-                            coroutineScope.launch {
-                                tubeViewModel.loadTubesByControlPointId(controlPoint.id)
-                            }
-                        },
-                        onAddNode = { name, type ->
-                            onAddNode(name, tube.id, type)
-                            coroutineScope.launch {
-                                nodeViewModel.loadNodesByTubeId(tube.id)
-                            }
-                        },
-                        onDeleteNode = { nodeId ->
-                            onDeleteNode(nodeId, tube.id)
-                            coroutineScope.launch {
-                                nodeViewModel.loadNodesByTubeId(tube.id)
-                            }
-                        },
-                        onEditNode = { node -> editingNode = node },
-                        onViewEquipment = { node ->
-                            selectedNodeForEquipment = node
+                        if (controlPoint.description.isNotEmpty()) {
+                            Text(
+                                text = controlPoint.description,
+                                style = MaterialTheme.typography.body2,
+                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f),
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
                         }
-                    )                }
+
+                        // Секция ПКУ с кнопкой добавления в одной строке
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("ПКУ", style = MaterialTheme.typography.h6)
+                            Row {
+                                IconButton(
+                                    onClick = { showAddPKUDialog = true },
+                                    modifier = Modifier.size(40.dp)
+                                ) {
+                                    Icon(Icons.Default.Add, contentDescription = "Добавить ПКУ")
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(2.dp))
+
+                        // Список ПКУ с фиксированной высотой
+                        if (pkus.isNotEmpty()) {
+                            LazyColumn(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(max = 150.dp)
+                            ) {
+                                items(pkus) { pku ->
+                                    PKUItem(
+                                        pku = pku,
+                                        sectionViewModel = sectionViewModel,
+                                        onEdit = { editingPKU = pku },
+                                        onDelete = { onDeletePKU(pku.id) },
+                                        onAddSection = { sectionName, pkuId ->
+                                            sectionViewModel.addSection(sectionName, pkuId)
+                                        },
+                                        onViewSectionEquipment = { sectionId ->
+                                            val sections = sectionViewModel.sections.value
+                                            val section = sections.find { it.id == sectionId }
+                                            selectedSectionForEquipment = section ?: SectionEntity(
+                                                id = sectionId,
+                                                name = "Отсек $sectionId",
+                                                pkuId = pku.id
+                                            )
+                                        }
+                                    )
+                                }
+                            }
+                        } else {
+                            Text(
+                                text = "Нет ПКУ",
+                                style = MaterialTheme.typography.caption,
+                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f),
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        // Секция Участков МН с кнопкой добавления в одной строке
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("Участки МН", style = MaterialTheme.typography.h6)
+                            IconButton(
+                                onClick = { showAddTubeDialog = true },
+                                modifier = Modifier.size(40.dp)
+                            ) {
+                                Icon(Icons.Default.Add, contentDescription = "Добавить участок МН")
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(2.dp))
+
+                        // Список участков МН занимает оставшееся пространство
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                                .verticalScroll(rememberScrollState())
+                        ) {
+                            tubes.forEach { tube ->
+                                TubeItem(
+                                    tube = tube,
+                                    nodeViewModel = nodeViewModel,
+                                    onEdit = { editingTube = tube },
+                                    onDelete = {
+                                        onDeleteTube(tube.id)
+                                        coroutineScope.launch {
+                                            tubeViewModel.loadTubesByControlPointId(controlPoint.id)
+                                        }
+                                    },
+                                    onAddNode = { name, type ->
+                                        onAddNode(name, tube.id, type)
+                                        coroutineScope.launch {
+                                            nodeViewModel.loadNodesByTubeId(tube.id)
+                                        }
+                                    },
+                                    onDeleteNode = { nodeId ->
+                                        onDeleteNode(nodeId, tube.id)
+                                        coroutineScope.launch {
+                                            nodeViewModel.loadNodesByTubeId(tube.id)
+                                        }
+                                    },
+                                    onEditNode = { node -> editingNode = node },
+                                    onViewEquipment = { node ->
+                                        selectedNodeForEquipment = node
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                1 -> { // ВКЛАДКА ЗАМЕЧАНИЙ
+                    RemarksTabWithArchive(
+                        activeRemarks = remarkViewModel.activeRemarks.collectAsState().value,
+                        archivedRemarks = remarkViewModel.archivedRemarks.collectAsState().value,
+                        onAddRemarkWithPhotos = { title, description, category, priority, deadline, photoPaths ->
+                            remarkViewModel.addRemarkWithPhotos(
+                                title,
+                                description,
+                                category,
+                                priority,
+                                deadline,
+                                photoPaths
+                            )
+                        },
+                        onEditRemark = { updatedRemark ->
+                            remarkViewModel.updateRemark(updatedRemark)
+                        },
+                        onUpdateStatus = { id, status ->
+                            remarkViewModel.updateRemarkStatus(id, status)
+                        },
+                        onArchiveRemark = { remarkId ->
+                            remarkViewModel.archiveRemark(remarkId)
+                        },
+                        onUnarchiveRemark = { remarkId ->
+                            remarkViewModel.unarchiveRemark(remarkId)
+                        },
+                        onDeleteRemark = { context, remark ->
+                            remarkViewModel.deleteRemark(context, remark)
+                        },
+                        controlPointName = controlPoint.name
+                    )
+                }
+
+                2 -> { // ВКЛАДКА СОБЫТИЙ
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("Раздел событий в разработке")
+                    }
+                }
             }
         }
     }
@@ -304,72 +389,38 @@ fun ControlPointDetailScreen(
         )
     }
 
-    // 1. ЕСЛИ ВЫБРАН УЗЕЛ ДЛЯ ПРОСМОТРА ОБОРУДОВАНИЯ - ПОКАЗЫВАЕМ ЭКРАН ОБОРУДОВАНИЯ
+    // В КОНЦЕ ControlPointDetailScreen.kt ЗАМЕНИТЕ весь блок навигации на:
+
+// Навигация к оборудованию - передаем через колбэки
     if (selectedNodeForEquipment != null) {
-        EquipmentDetailScreen(
-            nodeName = selectedNodeForEquipment!!.name,
-            nodeId = selectedNodeForEquipment!!.id,
-            onBackClick = { selectedNodeForEquipment = null },
-            onViewEquipment = { equipmentId ->
-                selectedEquipmentForView = equipmentId
-                selectedNodeForEquipment = null
-            }
-        )
+        // Передаем узел через колбэк
+        onViewEquipment(selectedNodeForEquipment!!.id, selectedNodeForEquipment!!.name)
+        // Сбрасываем состояние
+        selectedNodeForEquipment = null
         return
     }
 
-    // 2. ЕСЛИ ВЫБРАНО ОБОРУДОВАНИЕ ДЛЯ ПРОСМОТРА - ПОКАЗЫВАЕМ ПРОСМОТР
-    if (selectedEquipmentForView != null) {
-        ViewEquipmentScreen(
-            equipmentId = selectedEquipmentForView!!,
-            onBackClick = {
-                selectedEquipmentForView = null
-                selectedNodeForEquipment = selectedNodeForEquipment
-            },
-            onEditClick = {
-                selectedEquipmentForEdit = selectedEquipmentForView
-                selectedEquipmentForView = null
-            }
-        )
-        return
-    }
-
-    // 3. ЕСЛИ ВЫБРАНО ОБОРУДОВАНИЕ ДЛЯ РЕДАКТИРОВАНИЯ - ПОКАЗЫВАЕМ РЕДАКТОР
-    if (selectedEquipmentForEdit != null) {
-        EditEquipmentScreen(
-            equipmentId = selectedEquipmentForEdit!!,
-            onBackClick = {
-                selectedEquipmentForView = selectedEquipmentForEdit
-                selectedEquipmentForEdit = null
-            },
-            onSaveClick = {
-                selectedEquipmentForView = selectedEquipmentForEdit
-                selectedEquipmentForEdit = null
-            }
-        )
-        return
-    }
-
-    // 4. ЕСЛИ ВЫБРАН ОТСЕК ДЛЯ ПРОСМОТРА ОБОРУДОВАНИЯ - ПОКАЗЫВАЕМ ЭКРАН ОБОРУДОВАНИЯ
     if (selectedSectionForEquipment != null) {
-        EquipmentDetailScreen(
-            sectionName = selectedSectionForEquipment!!.name,
-            sectionId = selectedSectionForEquipment!!.id,
-            onBackClick = { selectedSectionForEquipment = null },
-            onViewEquipment = { equipmentId ->
-                selectedEquipmentForView = equipmentId
-                selectedSectionForEquipment = null
-            }
-        )
+        // Передаем секцию через колбэк
+        onViewSectionEquipment(selectedSectionForEquipment!!.id, selectedSectionForEquipment!!.name)
+        // Сбрасываем состояние
+        selectedSectionForEquipment = null
         return
+    }
+
+// Остальные случаи навигации (если нужны)
+    if (selectedEquipmentForView != null) {
+        // Обработка просмотра оборудования
+        selectedEquipmentForView = null
+    }
+
+    if (selectedEquipmentForEdit != null) {
+        // Обработка редактирования оборудования
+        selectedEquipmentForEdit = null
     }
 
     if (selectedEquipmentForEditing != null) {
-        EditEquipmentScreen(
-            equipmentId = selectedEquipmentForEditing!!,
-            onBackClick = { selectedEquipmentForEditing = null },
-            onSaveClick = { selectedEquipmentForEditing = null }
-        )
-        return
+        // Обработка редактирования оборудования
+        selectedEquipmentForEditing = null
     }
 }

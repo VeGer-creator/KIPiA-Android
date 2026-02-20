@@ -1,4 +1,3 @@
-// app/src/main/java/com/example/kipia/database/NodeDao.kt
 package com.example.kipia.database
 
 import androidx.room.Dao
@@ -19,6 +18,9 @@ interface NodeDao {
 
     @Query("SELECT * FROM node_table WHERE tubeId = :tubeId ORDER BY orderIndex ASC")
     suspend fun getNodesByTubeId(tubeId: Long): List<NodeEntity>
+
+    @Query("SELECT * FROM node_table")
+    suspend fun getAllNodes(): List<NodeEntity>
 
     @Query("SELECT * FROM node_table WHERE id = :id")
     suspend fun getNodeById(id: Long): NodeEntity?

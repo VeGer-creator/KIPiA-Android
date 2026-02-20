@@ -42,7 +42,8 @@ fun AddEquipmentDialog(
                     EquipmentType.OPENING_DETECTOR,
                     EquipmentType.PRESSURE_GAUGE,
                     EquipmentType.PRESSURE_TRANSDUCER,
-                    EquipmentType.DPS
+                    EquipmentType.DPS,
+                    EquipmentType.R_K
                 )
             }
             nodeName.contains("В", ignoreCase = true) -> {

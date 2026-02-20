@@ -34,7 +34,8 @@ fun AddSectionEquipmentDialog(
                     EquipmentType.AIR_CONDITIONER,
                     EquipmentType.CONTROL_PANEL,
                     EquipmentType.FLOOD_DETECTOR,
-                    EquipmentType.OPENING_DETECTOR
+                    EquipmentType.OPENING_DETECTOR,
+                    EquipmentType.BKEP
                 )
             }
             sectionName.contains("Трансформаторный", ignoreCase = true) -> {

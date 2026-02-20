@@ -1,4 +1,3 @@
-// app/src/main/java/com/example/kipia/database/AppDatabase.kt
 package com.example.kipia.database
 
 import androidx.room.Database
@@ -18,10 +17,9 @@ import android.content.Context
         RemarkEntity::class,
         EventEntity::class
     ],
-    version = 9, // Увеличиваем версию
-    exportSchema = false
+    version = 13, // НЕ МЕНЯЙТЕ эту версию без необходимости
+    exportSchema = false // Отключаем экспорт схемы чтобы избежать проверок
 )
-
 abstract class AppDatabase : RoomDatabase() {
     abstract fun controlPointDao(): ControlPointDao
     abstract fun pkuDao(): PKUDao
@@ -29,9 +27,9 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun nodeDao(): NodeDao
     abstract fun sectionDao(): SectionDao
     abstract fun equipmentDao(): EquipmentDao
-    abstract fun detailedEquipmentDao(): DetailedEquipmentDao // ДОБАВИТЬ
-    abstract fun remarkDao(): RemarkDao // ДОБАВИТЬ
-    abstract fun eventDao(): EventDao // ДОБАВИТЬ
+    abstract fun detailedEquipmentDao(): DetailedEquipmentDao
+    abstract fun remarkDao(): RemarkDao
+    abstract fun eventDao(): EventDao
 
     companion object {
         @Volatile
@@ -44,11 +42,17 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "kipia_database"
                 )
-                    .fallbackToDestructiveMigration()
+                    .fallbackToDestructiveMigration() // Всегда используем деструктивную миграцию
                     .build()
                 INSTANCE = instance
                 instance
             }
+        }
+
+        // Метод для принудительного пересоздания базы (для разработки)
+        fun recreateInstance(context: Context): AppDatabase {
+            INSTANCE = null
+            return getInstance(context)
         }
     }
 }

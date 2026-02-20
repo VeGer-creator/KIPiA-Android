@@ -16,25 +16,26 @@ import androidx.room.PrimaryKey
         ),
         ForeignKey(
             entity = SectionEntity::class,
-            parentColumns = ["id"],
             childColumns = ["sectionId"],
+            parentColumns = ["id"],
             onDelete = ForeignKey.CASCADE
         )
     ],
     indices = [
-        Index(value = ["nodeId"]), // ДОБАВИТЬ ЭТУ СТРОКУ
-        Index(value = ["sectionId"]) // ДОБАВИТЬ ЭТУ СТРОКУ
+        Index(value = ["nodeId"]),
+        Index(value = ["sectionId"])
     ]
 )
 data class EquipmentEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0L,
-    val name: String,
+    val name: String = "", // ИСПРАВЛЕНО: значение по умолчанию
     val nodeId: Long? = null,
     val sectionId: Long? = null,
     val model: String = "",
     val manufacturer: String = "",
-    val serialNumber: String = "",
-    val nominal: String = "",
-    val verificationYear: String = ""
+    val serialNumber: String = "", // ИСПРАВЛЕНО: значение по умолчанию
+    val nominal: String = "", // ИСПРАВЛЕНО: значение по умолчанию
+    val verificationYear: String = "", // ИСПРАВЛЕНО: значение по умолчанию
+    val photoPaths: String = ""
 )

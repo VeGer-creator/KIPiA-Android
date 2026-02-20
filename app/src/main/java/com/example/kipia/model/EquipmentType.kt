@@ -7,6 +7,8 @@ enum class EquipmentType(val displayName: String) {
     PRESSURE_GAUGE("Манометр давления"),
     PRESSURE_TRANSDUCER("Преобразователь давления"),
     DPS("ДПС"),
+    R_K("Распред.коробка"),
+
 
     // Оборудование для задвижек
     VALVE("Задвижка"),
